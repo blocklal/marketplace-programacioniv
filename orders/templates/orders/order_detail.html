@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Orden #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Orden #{{ order.order_number }}</h1>
+        {% if order.status in 'pending,processing' %}
+            <a href="{% url 'cancel_order' order.id %}" 
+               class="btn btn-outline-danger"
+               onclick="return confirm('¿Estás seguro de cancelar esta orden?')">
+                Cancelar Orden
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <!-- Información de la orden -->
+        <div class="col-md-8">
+            <!-- Estado y pago -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Estado de la Orden</h6>
+                            {% if order.status == 'pending' %}
+                                <span class="badge bg-warning fs-6">Pendiente</span>
+                            {% elif order.status == 'processing' %}
+                                <span class="badge bg-info fs-6">Procesando</span>
+                            {% elif order.status == 'shipped' %}
+                                <span class="badge bg-primary fs-6">Enviado</span>
+                            {% elif order.status == 'delivered' %}
+                                <span class="badge bg-success fs-6">Entregado</span>
+                            {% elif order.status == 'cancelled' %}
+                                <span class="badge bg-danger fs-6">Cancelado</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Estado del Pago</h6>
+                            {% if order.paid %}
+                                <span class="badge bg-success fs-6">Pagado</span>
+                                <br>
+                                <small class="text-muted">{{ order.paid_at|date:"d/m/Y H:i" }}</small>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6">Sin pagar</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Productos -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Productos</h5>
+                    
+                    {% for item in order.items.all %}
+                    <div class="row align-items-center mb-3 pb-3 border-bottom">
+                        <div class="col-md-2">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" 
+                                     alt="{{ item.product_name }}" 
+                                     class="img-fluid rounded">
+                            {% else %}
+                                <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 60px;">
+                                    <span class="text-white small">Sin imagen</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-1">{{ item.product_name }}</h6>
+                            <small class="text-muted">Cantidad: {{ item.quantity }}</small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <strong>${{ item.subtotal }}</strong>
+                            <br>
+                            <small class="text-muted">${{ item.product_price }} c/u</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Información de envío -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Información de Envío</h5>
+                    <p class="mb-1"><strong>Dirección:</strong> {{ order.shipping_address }}</p>
+                    <p class="mb-1"><strong>Ciudad:</strong> {{ order.shipping_city }}</p>
+                    <p class="mb-1"><strong>País:</strong> {{ order.shipping_country }}</p>
+                    <p class="mb-0"><strong>Teléfono:</strong> {{ order.shipping_phone }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="col-md-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Resumen</h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>${{ order.subtotal }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Envío</span>
+                        {% if order.shipping_cost == 0 %}
+                            <span class="text-success">Gratis</span>
+                        {% else %}
+                            <span>${{ order.shipping_cost }}</span>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong class="fs-5">Total</strong>
+                        <strong class="fs-4 text-primary">${{ order.total }}</strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <strong>Método de pago:</strong><br>
+                            {{ order.get_payment_method_display }}
+                        </small>
+                    </div>
+
+                    <div class="text-muted">
+                        <small>
+                            <strong>Fecha de pedido:</strong><br>
+                            {{ order.created_at|date:"d/m/Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">
+            Ver todas mis órdenes
+        </a>
+        <a href="{% url 'product_list' %}" class="btn btn-primary">
+            Seguir comprando
+        </a>
+    </div>
+</div>
+{% endblock %}

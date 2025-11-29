@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Órdenes{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Mis Órdenes</h1>
+
+    {% if orders %}
+        <div class="row">
+            {% for order in orders %}
+            <div class="col-12 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <h6 class="mb-0">Orden #{{ order.order_number }}</h6>
+                                <small class="text-muted">{{ order.created_at|date:"d/m/Y" }}</small>
+                            </div>
+
+                            <div class="col-md-3">
+                                <strong>{{ order.items.count }} producto(s)</strong>
+                                <br>
+                                <small class="text-muted">Total: ${{ order.total }}</small>
+                            </div>
+
+                            <div class="col-md-2">
+                                {% if order.status == 'pending' %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                {% elif order.status == 'processing' %}
+                                    <span class="badge bg-info">Procesando</span>
+                                {% elif order.status == 'shipped' %}
+                                    <span class="badge bg-primary">Enviado</span>
+                                {% elif order.status == 'delivered' %}
+                                    <span class="badge bg-success">Entregado</span>
+                                {% elif order.status == 'cancelled' %}
+                                    <span class="badge bg-danger">Cancelado</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-2">
+                                {% if order.paid %}
+                                    <span class="badge bg-success">Pagado</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Sin pagar</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-3 text-end">
+                                <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-primary">
+                                    Ver Detalle
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-box" style="font-size: 5rem; color: #ccc;"></i>
+            <h3 class="mt-4">No tienes órdenes aún</h3>
+            <p class="text-muted">Cuando realices una compra, aparecerá aquí</p>
+            <a href="{% url 'product_list' %}" class="btn btn-primary mt-3">
+                Ver productos
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

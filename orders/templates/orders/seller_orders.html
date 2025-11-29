@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Ventas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-store"></i> Panel de Ventas</h1>
+        <a href="{% url 'profile_view' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Volver al Perfil
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ total_orders|default:0 }}</h3>
+                    <p class="mb-0">Órdenes Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ pending_count|default:0 }}</h3>
+                    <p class="mb-0">Pendientes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-info">{{ processing_count|default:0 }}</h3>
+                    <p class="mb-0">En Proceso</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-success">{{ delivered_count|default:0 }}</h3>
+                    <p class="mb-0">Entregados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if orders %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Órdenes con tus Productos</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Orden #</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th>Tus Productos</th>
+                                <th>Total (tus productos)</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order_data in orders %}
+                            <tr>
+                                <td><strong>#{{ order_data.order.order_number }}</strong></td>
+                                <td>
+                                    <i class="fas fa-user"></i> {{ order_data.order.user.username }}
+                                </td>
+                                <td>{{ order_data.order.created_at|date:"d/m/Y" }}</td>
+                                <td>{{ order_data.items|length }} producto(s)</td>
+                                <td><strong>${{ order_data.seller_total }}</strong></td>
+                                <td>
+                                    {% if order_data.order.status == 'pending' %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                    {% elif order_data.order.status == 'processing' %}
+                                        <span class="badge bg-info">Procesando</span>
+                                    {% elif order_data.order.status == 'shipped' %}
+                                        <span class="badge bg-primary">Enviado</span>
+                                    {% elif order_data.order.status == 'delivered' %}
+                                        <span class="badge bg-success">Entregado</span>
+                                    {% elif order_data.order.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'seller_order_detail' order_data.order.id %}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> Ver Detalle
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-box-open" style="font-size: 5rem; color: #ccc;"></i>
+            <h3 class="mt-4">No tienes ventas aún</h3>
+            <p class="text-muted">Cuando alguien compre tus productos, aparecerán aquí</p>
+            <a href="{% url 'product_list' %}" class="btn btn-primary mt-3">
+                Ver mis productos
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

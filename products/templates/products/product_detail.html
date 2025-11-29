@@ -95,6 +95,25 @@
                                 <i class="far fa-heart"></i> Iniciar sesión para favoritos
                             </a>
                         {% endif %}
+
+                        {% if user.is_authenticated and product.owner == user.profile %}
+                            <div class="card mt-4 bg-light border-warning">
+                                <div class="card-body">
+                                    <h6 class="card-title text-warning">
+                                        <i class="fas fa-tools"></i> Panel de Administración
+                                    </h6>
+                                    <p class="card-text small mb-3">Este es tu producto. Puedes editarlo o eliminarlo.</p>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'product_edit' product.id %}" class="btn btn-warning">
+                                            <i class="fas fa-edit"></i> Editar Producto
+                                        </a>
+                                        <a href="{% url 'product_delete' product.id %}" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i> Eliminar Producto
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <!-- Información del vendedor -->

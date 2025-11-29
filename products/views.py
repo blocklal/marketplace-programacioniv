@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Product, Category
+from django.contrib import messages
 
 # Create your views here.
 
@@ -74,6 +75,85 @@ def product_add(request):
         'categories': categories
     }
     return render(request, 'products/product_form.html', context)
+
+
+@login_required
+def product_edit(request, product_id):
+    """Editar un producto"""
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Verificar que el usuario sea el dueño
+    if product.owner != request.user.profile:
+        messages.error(request, 'No tienes permiso para editar este producto')
+        return redirect('product_detail', product_id=product_id)
+    
+    if request.method == 'POST':
+        # Obtener datos del formulario
+        name = request.POST.get('name')
+        category_id = request.POST.get('category')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
+        stock = request.POST.get('stock')
+        brand = request.POST.get('brand')
+        on_stock = request.POST.get('on_stock') == 'on'
+        
+        # Actualizar producto
+        product.name = name
+        product.category = Category.objects.get(id=category_id)
+        product.description = description
+        product.price = price
+        product.stock = stock
+        product.brand = brand
+        product.on_stock = on_stock
+        
+        # Actualizar imagen si se subió una nueva
+        if request.FILES.get('image'):
+            product.image = request.FILES['image']
+        
+        product.save()
+        
+        messages.success(request, 'Producto actualizado exitosamente')
+        return redirect('product_detail', product_id=product.id)
+    
+    # GET request - mostrar formulario
+    categories = Category.objects.all()
+    context = {
+        'product': product,
+        'categories': categories
+    }
+    return render(request, 'products/product_edit.html', context)
+
+@login_required
+def product_delete(request, product_id):
+    """Eliminar un producto"""
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Verificar que el usuario sea el dueño
+    if product.owner != request.user.profile:
+        messages.error(request, 'No tienes permiso para eliminar este producto')
+        return redirect('product_detail', product_id=product_id)
+    
+    if request.method == 'POST':
+        product_name = product.name
+        product.delete()
+        messages.success(request, f'Producto "{product_name}" eliminado exitosamente')
+        return redirect('profile_view')
+    
+    # Si no es POST, mostrar confirmación
+    context = {
+        'product': product
+    }
+    return render(request, 'products/product_delete_confirm.html', context)
+
+@login_required
+def my_products(request):
+    """Listar mis productos"""
+    products = Product.objects.filter(owner=request.user.profile).order_by('-creation_time')
+    
+    context = {
+        'products': products
+    }
+    return render(request, 'products/my_products.html', context)
 
 
 def category_add(request):
