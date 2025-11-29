@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from .models import Order, OrderItem
+from .models import Order, OrderItem, Review
 from cart.models import Cart
 from django.db.models import Q
 
@@ -94,8 +94,19 @@ def create_order(request):
 
 @login_required
 def order_list(request):
-    """Listar todas las órdenes del usuario"""
-    orders = Order.objects.filter(user=request.user)
+    orders = Order.objects.filter(user=request.user).prefetch_related(
+        'items__reviews',
+        'items__seller'
+    ).order_by('-created_at')
+    
+    # Agregar la review del usuario a cada item
+    for order in orders:
+        for item in order.items.all():
+            item.user_review = item.reviews.filter(
+                autor=request.user,
+                tipo='vendedor'
+            ).first()
+    
     context = {
         'orders': orders
     }
@@ -226,3 +237,123 @@ def update_order_status(request, order_id):
         messages.error(request, 'Estado inválido')
     
     return redirect('seller_order_detail', order_id=order.id)
+
+
+@login_required
+def crear_review_vendedor(request, order_item_id):
+    """El comprador deja review al vendedor"""
+    order_item = get_object_or_404(OrderItem, id=order_item_id)
+    order = order_item.order
+    
+    # Verificar permisos
+    if request.user != order.user:
+        messages.error(request, 'No tienes permiso para revisar este pedido.')
+        return redirect('order_detail', order_id=order.id)
+    
+    if order.status != 'delivered':
+        messages.error(request, 'Solo puedes dejar reviews en pedidos entregados.')
+        return redirect('order_detail', order_id=order.id)
+    
+    # Verificar si ya dejó review
+    if Review.objects.filter(order_item=order_item, autor=request.user, tipo='vendedor').exists():
+        messages.warning(request, 'Ya dejaste una review para este producto.')
+        return redirect('order_detail', order_id=order.id)
+    
+    if request.method == 'POST':
+        calificacion = request.POST.get('calificacion')
+        comentario = request.POST.get('comentario', '')
+        
+        try:
+            Review.objects.create(
+                autor=request.user,
+                receptor=order_item.seller,
+                order_item=order_item,
+                tipo='vendedor',
+                calificacion=int(calificacion),
+                comentario=comentario
+            )
+            messages.success(request, 'Review enviada exitosamente.')
+            return redirect('perfil_usuario', username=order_item.seller.username)
+        except Exception as e:
+            messages.error(request, f'Error al crear review: {str(e)}')
+    
+    context = {
+        'order': order,
+        'order_item': order_item,
+        'vendedor': order_item.seller,
+    }
+    return render(request, 'reviews/crear_review_vendedor.html', context)
+
+
+@login_required
+def crear_review_comprador(request, order_item_id):
+    """El vendedor deja review al comprador"""
+    order_item = get_object_or_404(OrderItem, id=order_item_id)
+    order = order_item.order
+    
+    # Verificar permisos
+    if request.user != order_item.seller:
+        messages.error(request, 'No tienes permiso para revisar este pedido.')
+        return redirect('mis_ventas')
+    
+    if order.status != 'delivered':
+        messages.error(request, 'Solo puedes dejar reviews en pedidos entregados.')
+        return redirect('mis_ventas')
+    
+    # Verificar si ya dejó review
+    if Review.objects.filter(order_item=order_item, autor=request.user, tipo='comprador').exists():
+        messages.warning(request, 'Ya dejaste una review para este comprador.')
+        return redirect('mis_ventas')
+    
+    if request.method == 'POST':
+        calificacion = request.POST.get('calificacion')
+        comentario = request.POST.get('comentario', '')
+        
+        try:
+            Review.objects.create(
+                autor=request.user,
+                receptor=order.user,
+                order_item=order_item,
+                tipo='comprador',
+                calificacion=int(calificacion),
+                comentario=comentario
+            )
+            messages.success(request, 'Review enviada exitosamente.')
+            return redirect('perfil_usuario', username=order.user.username)
+        except Exception as e:
+            messages.error(request, f'Error al crear review: {str(e)}')
+    
+    context = {
+        'order': order,
+        'order_item': order_item,
+        'comprador': order.user,
+    }
+    return render(request, 'reviews/crear_review_comprador.html', context)
+
+@login_required
+def mis_reviews_pendientes(request):
+    """Lista de items que el usuario puede revisar"""
+    
+    # Como comprador: items de órdenes entregadas sin review a vendedor
+    items_comprados = OrderItem.objects.filter(
+        order__user=request.user,
+        order__status='delivered'
+    ).exclude(
+        reviews__autor=request.user,
+        reviews__tipo='vendedor'
+    ).select_related('order', 'product', 'seller')
+    
+    # Como vendedor: items vendidos en órdenes entregadas sin review a comprador
+    items_vendidos = OrderItem.objects.filter(
+        seller=request.user,
+        order__status='delivered'
+    ).exclude(
+        reviews__autor=request.user,
+        reviews__tipo='comprador'
+    ).select_related('order', 'product')
+    
+    context = {
+        'items_comprados': items_comprados,
+        'items_vendidos': items_vendidos,
+    }
+    return render(request, 'reviews/pendientes_review.html', context)

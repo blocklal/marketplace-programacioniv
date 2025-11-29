@@ -6,6 +6,8 @@ from django.core.mail import send_mail
 from django.db import IntegrityError
 from .forms import CustomUserCreationForm
 from django.contrib.auth.models import User
+from orders.models import Review
+from django.db.models import Avg
 
 # Create your views here.
 
@@ -60,14 +62,34 @@ def signout(request):
 
 @login_required
 def profile_view(request, username=None):
-    if username:
-        user = get_object_or_404(User, username=username)
+    # Si no hay username, mostrar el perfil del usuario actual
+    if username is None:
+        profile_user = request.user
     else:
-        user = request.user
+        profile_user = get_object_or_404(User, username=username)
+    
+    profile = profile_user.profile
+    
+    # Reviews
+    reviews_vendedor = Review.objects.filter(receptor=profile_user, tipo='vendedor').select_related('autor', 'order_item')
+    reviews_comprador = Review.objects.filter(receptor=profile_user, tipo='comprador').select_related('autor', 'order_item')
+    
+    # Calcular promedios
+    promedio_vendedor = reviews_vendedor.aggregate(Avg('calificacion'))['calificacion__avg']
+    promedio_comprador = reviews_comprador.aggregate(Avg('calificacion'))['calificacion__avg']
+    
+    promedio_vendedor = round(promedio_vendedor, 1) if promedio_vendedor else 0
+    promedio_comprador = round(promedio_comprador, 1) if promedio_comprador else 0
     
     context = {
-        'profile_user': user,
-        'profile': user.profile
+        'profile_user': profile_user,
+        'profile': profile,
+        'reviews_vendedor': reviews_vendedor,
+        'reviews_comprador': reviews_comprador,
+        'promedio_vendedor': promedio_vendedor,
+        'promedio_comprador': promedio_comprador,
+        'total_reviews_vendedor': reviews_vendedor.count(),
+        'total_reviews_comprador': reviews_comprador.count(),
     }
     return render(request, 'profiles/profile.html', context)
 

@@ -42,6 +42,49 @@
                 </div>
             </div>
 
+            <!-- Estadísticas de Reviews -->
+            <div class="card shadow mt-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Reputación</h5>
+                    
+                    <!-- Como Vendedor -->
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Como Vendedor</span>
+                            <span class="badge bg-primary">{{ total_reviews_vendedor }} reviews</span>
+                        </div>
+                        <div class="text-warning fs-4 mt-2">
+                            {% if promedio_vendedor > 0 %}
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= promedio_vendedor %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                                <span class="text-dark fs-6 ms-1">({{ promedio_vendedor }})</span>
+                            {% else %}
+                                <span class="text-muted fs-6">Sin calificaciones</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Como Comprador -->
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Como Comprador</span>
+                            <span class="badge bg-success">{{ total_reviews_comprador }} reviews</span>
+                        </div>
+                        <div class="text-warning fs-4 mt-2">
+                            {% if promedio_comprador > 0 %}
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= promedio_comprador %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                                <span class="text-dark fs-6 ms-1">({{ promedio_comprador }})</span>
+                            {% else %}
+                                <span class="text-muted fs-6">Sin calificaciones</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Información adicional -->
             <div class="card shadow mt-3">
                 <div class="card-body">
@@ -77,7 +120,7 @@
             {% endif %}
 
             <!-- Productos publicados con carrusel -->
-            <div class="card shadow">
+            <div class="card shadow mb-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title mb-0">Productos publicados</h5>
@@ -145,6 +188,100 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- SECCIÓN DE REVIEWS -->
+            {% if reviews_vendedor or reviews_comprador %}
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-star text-warning"></i> Reviews
+                    </h5>
+                    <!-- Tabs para cambiar entre tipos de review -->
+                    <ul class="nav nav-tabs mb-3" id="reviewsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="vendedor-tab" data-bs-toggle="tab" data-bs-target="#vendedor" type="button" role="tab">
+                                Como Vendedor ({{ total_reviews_vendedor }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="comprador-tab" data-bs-toggle="tab" data-bs-target="#comprador" type="button" role="tab">
+                                Como Comprador ({{ total_reviews_comprador }})
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="reviewsTabContent">
+                        <!-- Reviews como Vendedor -->
+                        <div class="tab-pane fade show active" id="vendedor" role="tabpanel">
+                            {% if reviews_vendedor %}
+                                {% for review in reviews_vendedor %}
+                                <div class="review-card mb-3 p-3 border rounded">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong>{{ review.autor.username }}</strong>
+                                            <div class="text-warning">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= review.calificacion %}★{% else %}☆{% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ review.fecha_creacion|date:"d/m/Y" }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ review.comentario }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-box"></i> {{ review.order_item.product_name }}
+                                    </small>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-comment-slash fs-2 mb-2"></i>
+                                    <p>No hay reviews como vendedor aún.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Reviews como Comprador -->
+                        <div class="tab-pane fade" id="comprador" role="tabpanel">
+                            {% if reviews_comprador %}
+                                {% for review in reviews_comprador %}
+                                <div class="review-card mb-3 p-3 border rounded">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong>{{ review.autor.username }}</strong>
+                                            <div class="text-warning">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= review.calificacion %}★{% else %}☆{% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ review.fecha_creacion|date:"d/m/Y" }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ review.comentario }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-box"></i> {{ review.order_item.product_name }}
+                                    </small>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-comment-slash fs-2 mb-2"></i>
+                                    <p>No hay reviews como comprador aún.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Mensaje si no hay reviews -->
+            <div class="card shadow">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-star text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3">Este usuario aún no tiene reviews.</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -161,12 +298,12 @@
     scroll-behavior: smooth;
     gap: 20px;
     padding: 10px 0;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .products-carousel::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
 }
 
 .product-card-carousel {
@@ -217,7 +354,16 @@
     font-size: 1.2rem;
 }
 
-/* Responsive */
+.review-card {
+    background-color: #f8f9fa;
+    transition: all 0.2s;
+}
+
+.review-card:hover {
+    background-color: #e9ecef;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
 @media (max-width: 768px) {
     .products-carousel-container {
         padding: 0 35px;
@@ -242,18 +388,15 @@
 <script>
 function scrollCarousel(direction) {
     const carousel = document.getElementById('productsCarousel');
-    const scrollAmount = 300; // Cantidad de píxeles a desplazar
+    const scrollAmount = 300;
     
     if (direction === 1) {
-        // Scroll derecha
         carousel.scrollLeft += scrollAmount;
     } else {
-        // Scroll izquierda
         carousel.scrollLeft -= scrollAmount;
     }
 }
 
-// También permitir scroll con toque en móvil
 document.addEventListener('DOMContentLoaded', function() {
     const carousel = document.getElementById('productsCarousel');
     if (!carousel) return;
@@ -287,7 +430,6 @@ document.addEventListener('DOMContentLoaded', function() {
         carousel.scrollLeft = scrollLeft - walk;
     });
     
-    // Cursor
     carousel.style.cursor = 'grab';
 });
 </script>

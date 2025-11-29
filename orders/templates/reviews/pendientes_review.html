@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reviews Pendientes{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Reviews Pendientes</h2>
+
+    <!-- Pedidos como comprador -->
+    {% if items_comprados %}
+    <div class="mb-5">
+        <h4 class="mb-3">Productos que compraste</h4>
+        <p class="text-muted">Deja una review a los vendedores</p>
+        
+        {% for item in items_comprados %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5>{{ item.product_name }}</h5>
+                        <p class="mb-1"><strong>Vendedor:</strong> {{ item.seller.username }}</p>
+                        <p class="mb-1"><strong>Orden:</strong> #{{ item.order.order_number }}</p>
+                        <p class="mb-0"><strong>Fecha:</strong> {{ item.order.created_at|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{% url 'crear_review_vendedor' item.id %}" class="btn btn-primary">
+                            Dejar Review
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Pedidos como vendedor -->
+    {% if items_vendidos %}
+    <div class="mb-5">
+        <h4 class="mb-3">Productos que vendiste</h4>
+        <p class="text-muted">Deja una review a los compradores</p>
+        
+        {% for item in items_vendidos %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5>{{ item.product_name }}</h5>
+                        <p class="mb-1"><strong>Comprador:</strong> {{ item.order.user.username }}</p>
+                        <p class="mb-1"><strong>Orden:</strong> #{{ item.order.order_number }}</p>
+                        <p class="mb-0"><strong>Fecha:</strong> {{ item.order.created_at|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{% url 'crear_review_comprador' item.id %}" class="btn btn-primary">
+                            Dejar Review
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Si no hay reviews pendientes -->
+    {% if not items_comprados and not items_vendidos %}
+    <div class="alert alert-info text-center">
+        <p class="mb-0">No tienes reviews pendientes en este momento.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

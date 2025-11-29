@@ -12,4 +12,9 @@ urlpatterns = [
     path('ventas/', views.seller_orders, name='seller_orders'),
     path('ventas/<int:order_id>/', views.seller_order_detail, name='seller_order_detail'),
     path('ventas/<int:order_id>/actualizar/', views.update_order_status, name='update_order_status'),
+
+    #Reviews
+    path('review/vendedor/<int:order_item_id>/', views.crear_review_vendedor, name='crear_review_vendedor'),
+    path('review/comprador/<int:order_item_id>/', views.crear_review_comprador, name='crear_review_comprador'),
+    path('mis-reviews-pendientes/', views.mis_reviews_pendientes, name='reviews_pendientes'),
 ]

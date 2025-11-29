@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem
+from .models import Order, OrderItem, Review
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -17,3 +17,13 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ['order', 'product_name', 'quantity', 'product_price', 'subtotal']
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ['autor', 'receptor', 'tipo', 'calificacion', 'order_item', 'fecha_creacion']
+    list_filter = ['tipo', 'calificacion', 'fecha_creacion']
+    search_fields = ['autor__username', 'receptor__username', 'comentario']
+    readonly_fields = ['fecha_creacion']
+    
+    def has_add_permission(self, request):
+        return False
