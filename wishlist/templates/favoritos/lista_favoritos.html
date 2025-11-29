@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Favoritos{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2>Mis Favoritos ({{ total_favoritos }})</h2>
+    
+    {% if favoritos %}
+        <div class="row mt-4">
+            {% for favorito in favoritos %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if favorito.producto.image %}
+                    <img src="{{ favorito.producto.image.url }}" class="card-img-top" alt="{{ favorito.producto.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <span class="text-white">Sin imagen</span>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ favorito.producto.name }}</h5>
+                        <p class="card-text text-muted">{{ favorito.producto.category.name }}</p>
+                        <p class="card-text">{{ favorito.producto.description|truncatewords:15 }}</p>
+                        <h4 class="text-primary">${{ favorito.producto.price }}</h4>
+                        <small class="text-muted d-block mb-3">
+                            Stock: {{ favorito.producto.stock }} | Marca: {{ favorito.producto.brand }}
+                        </small>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'product_detail' favorito.producto.id %}" class="btn btn-primary flex-grow-1">Ver detalles</a>
+                            <form method="post" action="{% url 'quitar_favorito' favorito.producto.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="fas fa-heart-broken"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-heart-broken"></i> No tienes productos en favoritos todavía.
+            <br>
+            <a href="{% url 'product_list' %}" class="alert-link">Explorar productos</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load favoritos_tags %}
+
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center my-4">
+        <h1>Todos los Productos</h1>
+        <div class="d-flex gap-2">
+            <a href="{% url 'lista_favoritos' %}" class="btn btn-outline-danger">
+                <i class="fas fa-heart"></i> Favoritos ({% contar_favoritos request.user %})
+            </a>
+            <a href="{% url 'product_add' %}" class="btn btn-primary">Agregar Producto</a>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'product_list' %}">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Buscar producto</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               placeholder="Nombre del producto" value="{{ search_query }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="category" class="form-label">Categoría</label>
+                        <select class="form-control" id="category" name="category">
+                            <option value="">Todas las categorías</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="brand" class="form-label">Marca</label>
+                        <input type="text" class="form-control" id="brand" name="brand" 
+                               placeholder="Marca" value="{{ brand }}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="min_price" class="form-label">Precio mínimo</label>
+                        <input type="number" class="form-control" id="min_price" name="min_price" 
+                               step="0.01" placeholder="0.00" value="{{ min_price }}">
+                    </div>
+
+                   
+                    <div class="col-md-3">
+                        <label for="max_price" class="form-label">Precio máximo</label>
+                        <input type="number" class="form-control" id="max_price" name="max_price" 
+                               step="0.01" placeholder="9999.99" value="{{ max_price }}">
+                    </div>
+
+                    
+                    <div class="col-md-6 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                        <a href="{% url 'product_list' %}" class="btn btn-secondary">Limpiar filtros</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if search_query or selected_category or min_price or max_price or brand %}
+    <p class="text-muted">
+        Mostrando {{ products.count }} resultado(s)
+    </p>
+    {% endif %}
+
+    <div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 hover-shadow position-relative" style="transition: transform 0.2s;">
+            <!-- Botón de favoritos flotante -->
+            {% if request.user.is_authenticated %}
+            {% es_favorito request.user product as is_fav %}
+            <button class="btn-favorito position-absolute top-0 end-0 m-2 btn btn-light rounded-circle shadow-sm" 
+                    data-producto-id="{{ product.id }}"
+                    style="width: 40px; height: 40px; z-index: 10;">
+                <i class="{% if is_fav %}fas{% else %}far{% endif %} fa-heart text-danger"></i>
+            </button>
+            {% endif %}
+
+            <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <span class="text-white">Sin imagen</span>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-muted">{{ product.category.name }}</p>
+                    <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                    <h4 class="text-primary">${{ product.price }}</h4>
+                    <small class="text-muted">
+                        Stock: {{ product.stock }} | Marca: {{ product.brand }}
+                        <br>
+                        {% if product.owner %}
+                            Vendedor: {{ product.owner.user.username }}
+                        {% endif %}
+                    </small>
+                    
+                    <!-- Botón agregar al carrito -->
+                    <div class="mt-3">
+                        {% if product.stock > 0 and product.on_stock %}
+                            <button class="btn-agregar-carrito-lista btn btn-primary w-100" 
+                                    data-producto-id="{{ product.id }}">
+                                <i class="fas fa-cart-plus"></i> Agregar al carrito
+                            </button>
+                        {% else %}
+                            <button class="btn btn-secondary w-100" disabled>
+                                Sin stock
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            No se encontraron productos con esos criterios. <a href="{% url 'product_list' %}">Ver todos</a>
+        </div>
+    </div>
+    {% endfor %}
+    </div>
+</div>
+
+<style>
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.btn-favorito {
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-favorito:hover {
+    transform: scale(1.1);
+    background: white;
+}
+
+.btn-favorito i {
+    font-size: 1.2rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ============================================
+    // SCRIPT PARA FAVORITOS
+    // ============================================
+    let procesandoFav = false;
+    
+    document.querySelectorAll('.btn-favorito').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (procesandoFav) return;
+            procesandoFav = true;
+            
+            const productoId = this.dataset.productoId;
+            const icon = this.querySelector('i');
+            const button = this;
+            
+            button.disabled = true;
+            
+            fetch(`/favoritos/toggle/${productoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.es_favorito) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                    } else {
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                    }
+                    
+                    // Actualizar contador en el navbar
+                    const contadorFav = document.querySelector('.contador-favoritos');
+                    if (contadorFav) {
+                        const actual = parseInt(contadorFav.textContent) || 0;
+                        const nuevo = data.es_favorito ? actual + 1 : actual - 1;
+                        contadorFav.textContent = nuevo;
+                        
+                        if (nuevo === 0) {
+                            contadorFav.style.display = 'none';
+                        } else {
+                            contadorFav.style.display = 'inline';
+                        }
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                button.disabled = false;
+                procesandoFav = false;
+            });
+        });
+    });
+
+    // ============================================
+    // SCRIPT PARA AGREGAR AL CARRITO
+    // ============================================
+    document.querySelectorAll('.btn-agregar-carrito-lista').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const productoId = this.dataset.productoId;
+            const button = this;
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+            
+            const url = "{% url 'cart_add' 0 %}".replace('0', productoId);
+            
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar contador del carrito
+                    const contadorCarrito = document.querySelector('.contador-carrito');
+                    if (contadorCarrito) {
+                        contadorCarrito.textContent = data.cart_count;
+                        contadorCarrito.style.display = 'inline';
+                    }
+                    
+                    // Feedback visual
+                    button.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-primary');
+                        button.disabled = false;
+                    }, 1500);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                button.innerHTML = '<i class="fas fa-times"></i> Error';
+                button.classList.add('btn-danger');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('btn-danger');
+                    button.disabled = false;
+                }, 2000);
+            });
+        });
+    });
+});
+
+// Función helper para obtener el CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

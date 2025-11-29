@@ -1,0 +1,550 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blue Shopping{% endblock %} | Tu Tienda Online</title>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-blue: #4A90E2;
+            --deep-blue: #2C5AA0;
+            --light-blue: #87CEEB;
+            --cream: #F5F0E8;
+            --siamese-brown: #8B7355;
+            --accent-gold: #D4AF37;
+            --dark: #2d3748;
+            --white: #ffffff;
+        }
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: var(--cream);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(74, 144, 226, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(135, 206, 235, 0.05) 0%, transparent 50%);
+        }
+        
+        /* Header Superior con patrón de huellas */
+        .top-header {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, var(--primary-blue) 100%);
+            color: white;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .top-header::before {
+            content: '🐾';
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.1;
+            left: 5%;
+            top: -10px;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .top-header::after {
+            content: '🐾';
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            right: 10%;
+            bottom: -5px;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .top-header a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+        
+        .top-header a:hover {
+            color: var(--accent-gold);
+        }
+        
+        /* Navbar Principal */
+        .main-navbar {
+            background-color: white;
+            box-shadow: 0 4px 20px rgba(74, 144, 226, 0.15);
+            padding: 20px 0;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--deep-blue), var(--primary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: var(--primary-blue);
+            -webkit-text-fill-color: var(--primary-blue);
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s;
+        }
+        
+        .search-bar {
+            max-width: 600px;
+        }
+        
+        .search-bar input {
+            border-radius: 30px 0 0 30px;
+            border: 2px solid var(--light-blue);
+            border-right: none;
+            padding: 12px 25px;
+            transition: all 0.3s;
+        }
+        
+        .search-bar input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        }
+        
+        .search-bar button {
+            border-radius: 0 30px 30px 0;
+            background: linear-gradient(135deg, var(--primary-blue), var(--deep-blue));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-weight: 500;
+            transition: transform 0.3s;
+        }
+        
+        .search-bar button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+        
+        .nav-icons {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-icon {
+            position: relative;
+            color: var(--deep-blue);
+            text-decoration: none;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .nav-icon:hover {
+            color: var(--primary-blue);
+            transform: translateY(-3px);
+        }
+        
+        .nav-icon i {
+            font-size: 1.5rem;
+        }
+        
+        .nav-icon .badge {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background: linear-gradient(135deg, var(--accent-gold), #FFD700);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+        }
+        
+        .nav-text {
+            font-size: 0.75rem;
+            display: block;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        
+        /* Barra de Categorías */
+        .categories-bar {
+            background: linear-gradient(to right, rgba(74, 144, 226, 0.08), rgba(135, 206, 235, 0.08));
+            padding: 15px 0;
+            border-bottom: 2px solid rgba(74, 144, 226, 0.1);
+        }
+        
+        .categories-bar a {
+            color: var(--dark);
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .categories-bar a:hover {
+            background: linear-gradient(135deg, var(--primary-blue), var(--deep-blue));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        
+        /* Banner Promocional con temática de gato */
+        .promo-banner {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, var(--primary-blue) 50%, var(--light-blue) 100%);
+            color: white;
+            padding: 18px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
+        }
+        
+        .promo-banner::before,
+        .promo-banner::after {
+            content: '😺';
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.2;
+            animation: wiggle 3s ease-in-out infinite;
+        }
+        
+        .promo-banner::before {
+            left: 5%;
+            top: -10px;
+        }
+        
+        .promo-banner::after {
+            right: 5%;
+            top: -10px;
+            animation-delay: 1.5s;
+        }
+        
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+        
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--dark) 0%, #1a202c 100%);
+            color: white;
+            padding: 50px 0 25px;
+            margin-top: 80px;
+            position: relative;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-blue), var(--light-blue), var(--primary-blue));
+        }
+        
+        footer h5 {
+            color: var(--light-blue);
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        footer h5::before {
+            content: '🐾';
+            font-size: 1.2rem;
+        }
+        
+        footer a {
+            color: #cbd5e0;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        footer a::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        footer a:hover {
+            color: var(--light-blue);
+            padding-left: 25px;
+        }
+        
+        footer a:hover::before {
+            opacity: 1;
+        }
+        
+        .payment-methods img {
+            height: 35px;
+            margin: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background: white;
+            padding: 5px;
+        }
+        
+        .payment-methods img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        
+        .social-icons a {
+            color: white;
+            font-size: 1.6rem;
+            margin: 0 12px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .social-icons a:hover {
+            color: var(--light-blue);
+            transform: translateY(-3px) scale(1.1);
+        }
+        
+        .footer-cat {
+            text-align: center;
+            font-size: 3rem;
+            margin-top: 20px;
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-bar {
+                margin: 15px 0;
+            }
+            
+            .nav-icons {
+                justify-content: center;
+                margin-top: 20px;
+                gap: 20px;
+            }
+            
+            .categories-bar {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header Superior -->
+    <div class="top-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-truck"></i> Envíos gratis en compras mayores a $50.000
+                </div>
+                <div>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile_view' %}"><i class="fas fa-user"></i> Hola, {{ user.username }}</a>
+                        <a href="{% url 'signout' %}"><i class="fas fa-sign-out-alt"></i> Salir</a>
+                    {% else %}
+                        <a href="{% url 'signin' %}"><i class="fas fa-sign-in-alt"></i> Ingresá</a>
+                        <a href="{% url 'signup' %}"><i class="fas fa-user-plus"></i> Registrate</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navbar Principal -->
+    <nav class="main-navbar">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Logo -->
+                <div class="col-lg-2 col-md-12 text-center text-lg-start mb-3 mb-lg-0">
+                    <a href="/" class="logo">
+                        <i class="fas fa-cat"></i> Blue Shopping
+                    </a>
+                </div>
+                
+                <!-- Barra de búsqueda -->
+                <div class="col-lg-6 col-md-12">
+                    <form action="{% url 'product_list' %}" method="get" class="search-bar mx-auto">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" 
+                                   placeholder="¿Qué estás buscando? 🐱" 
+                                   aria-label="Buscar productos">
+                            <button class="btn" type="submit">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Iconos de navegación -->
+                <div class="col-lg-4 col-md-12">
+                    <div class="nav-icons justify-content-center justify-content-lg-end">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'lista_favoritos' %}" class="nav-icon">
+                            <i class="fas fa-heart"></i>
+                            {% load favoritos_tags %}
+                            {% contar_favoritos user as total_favs %}
+                            <span class="badge contador-favoritos" {% if total_favs == 0 %}style="display: none;"{% endif %}>{{ total_favs }}</span>
+                            <span class="nav-text">Favoritos</span>
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'profile_view' %}" class="nav-icon">
+                            <i class="fas fa-user"></i>
+                            <span class="nav-text">Mi cuenta</span>
+                        </a>
+                        
+                        <a href="{% url 'cart_view' %}" class="nav-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge contador-carrito" {% if cart_total_items == 0 %}style="display: none;"{% endif %}>{{ cart_total_items }}</span>
+                            <span class="nav-text">Carrito</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Barra de Categorías -->
+    <div class="categories-bar">
+        <div class="container">
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="{% url 'product_list' %}"><i class="fas fa-th"></i> Todos</a>
+                {% for cat in categories %}
+                    {% if cat.name == "Lácteos" %}
+                        <a href="{% url 'product_list' %}?category={{ cat.id }}"><i class="fas fa-cheese"></i> Lácteos</a>
+                    {% elif cat.name == "Carnes" or cat.name == "carnes" %}
+                        <a href="{% url 'product_list' %}?category={{ cat.id }}"><i class="fas fa-drumstick-bite"></i> Carnes</a>
+                    {% elif cat.name == "Almacén" or cat.name == "almacen" or cat.name == "Almacen" %}
+                        <a href="{% url 'product_list' %}?category={{ cat.id }}"><i class="fas fa-box"></i> Almacén</a>
+                    {% elif cat.name == "Bebidas" or cat.name == "bebidas" %}
+                        <a href="{% url 'product_list' %}?category={{ cat.id }}"><i class="fas fa-wine-bottle"></i> Bebidas</a>
+                    {% elif cat.name == "Verduras" or cat.name == "verduras" or cat.name == "Frutas y Verduras" %}
+                        <a href="{% url 'product_list' %}?category={{ cat.id }}"><i class="fas fa-carrot"></i> Frutas y Verduras</a>
+                    {% elif cat.name == "Limpieza" or cat.name == "limpieza" %}
+                        <a href="{% url 'product_list' %}?category={{ cat.id }}"><i class="fas fa-spray-can"></i> Limpieza</a>
+                    {% elif cat.name == "Ofertas" or cat.name == "ofertas" %}
+                        <a href="{% url 'product_list' %}?category={{ cat.id }}"><i class="fas fa-tag"></i> Ofertas</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Banner Promocional -->
+    <div class="promo-banner">
+        <i class="fas fa-bolt"></i> ¡OFERTAS GATÁSTICAS! Hasta 40% OFF en productos seleccionados <i class="fas fa-bolt"></i>
+    </div>
+    
+    <!-- Contenido Principal -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <h5>Atención al Cliente</h5>
+                    <a href="#"><i class="fas fa-phone"></i> 0800-BLUE-SHOP</a>
+                    <a href="#"><i class="fas fa-whatsapp"></i> WhatsApp</a>
+                    <a href="#"><i class="fas fa-envelope"></i> info@blueshopping.com.ar</a>
+                    <a href="#"><i class="fas fa-question-circle"></i> Preguntas Frecuentes</a>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <h5>Información</h5>
+                    <a href="#">Sobre Blue Shopping</a>
+                    <a href="#">Términos y Condiciones</a>
+                    <a href="#">Política de Privacidad</a>
+                    <a href="#">Botón de Arrepentimiento</a>
+                    <a href="#">Defensa del Consumidor</a>
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <h5>Mi Cuenta</h5>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'profile_view' %}">Mi Perfil</a>
+                    <a href="#">Mis Pedidos</a>
+                    <a href="{% url 'lista_favoritos' %}">Mis Favoritos</a>
+                    {% else %}
+                    <a href="{% url 'signin' %}">Ingresar</a>
+                    <a href="{% url 'signup' %}">Crear Cuenta</a>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-3 mb-4">
+                    <h5>Medios de Pago</h5>
+                    <div class="payment-methods">
+                        <img src="https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c3381f368aaf-m.svg" alt="Visa">
+                        <img src="https://http2.mlstatic.com/storage/logos-api-admin/b2c93a40-f3be-11eb-9984-b7076edb0bb7-m.svg" alt="Mastercard">
+                        <img src="https://http2.mlstatic.com/storage/logos-api-admin/992bc350-f3be-11eb-826e-6db365b9e0dd-m.svg" alt="Mercado Pago">
+                    </div>
+                    <h5 class="mt-4">Seguinos</h5>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-cat">😺</div>
+            
+            <hr style="border-color: #4a5568; margin-top: 30px;">
+            
+            <div class="text-center py-3">
+                <p class="mb-0">&copy; 2024 Blue Shopping. Todos los derechos reservados.</p>
+                <small style="color: var(--light-blue);">Hecho en Argentina con 💙 y 🐱</small>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

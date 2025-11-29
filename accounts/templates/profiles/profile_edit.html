@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Editar mi perfil</h3>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Imagen de perfil actual -->
+                        <div class="text-center mb-4">
+                            {% if profile.profile_picture %}
+                                <img src="{{ profile.profile_picture.url }}" 
+                                     alt="Perfil actual" 
+                                     class="rounded-circle mb-2" 
+                                     style="width: 120px; height: 120px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-2" 
+                                     style="width: 120px; height: 120px;">
+                                    <span class="text-white fs-2">{{ request.user.username|first|upper }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Información personal -->
+                        <h5 class="mb-3">Información personal</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       value="{{ request.user.first_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       value="{{ request.user.last_name }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ request.user.email }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Biografía</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="4" 
+                                      maxlength="500">{{ profile.bio }}</textarea>
+                            <small class="form-text text-muted">Máximo 500 caracteres</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="profile_picture" class="form-label">Foto de perfil</label>
+                            <input type="file" class="form-control" id="profile_picture" 
+                                   name="profile_picture" accept="image/*">
+                            <small class="form-text text-muted">Formatos aceptados: JPG, PNG, GIF</small>
+                        </div>
+
+                        <!-- Información de contacto -->
+                        <h5 class="mb-3 mt-4">Información de contacto</h5>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ profile.phone }}" maxlength="20">
+                        </div>
+
+
+                        <!-- Botones -->
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                            <a href="{% url 'profile_view' %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil de {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Sidebar con info del perfil -->
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <!-- Foto de perfil -->
+                    {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}" 
+                             alt="{{ profile_user.username }}" 
+                             class="rounded-circle mb-3" 
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3" 
+                             style="width: 150px; height: 150px;">
+                            <span class="text-white fs-1">{{ profile_user.username|first|upper }}</span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Nombre de usuario -->
+                    <h3>{{ profile_user.username }}</h3>
+                    
+                    <!-- Nombre completo -->
+                    {% if profile_user.first_name or profile_user.last_name %}
+                        <p class="text-muted">{{ profile_user.get_full_name }}</p>
+                    {% endif %}
+
+                    <!-- Botón editar (solo si es tu perfil) -->
+                    {% if request.user == profile_user %}
+                        <a href="{% url 'profile_edit' %}" class="btn btn-primary w-100 mt-3">
+                            Editar Perfil
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="card shadow mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Información de contacto</h5>
+                    
+                    {% if profile.phone %}
+                        <p class="mb-2">
+                            <i class="fas fa-phone"></i>
+                            <strong>Teléfono:</strong> {{ profile.phone }}
+                        </p>
+                    {% endif %}
+
+                    {% if profile_user.email %}
+                        <p class="mb-2">
+                            <i class="fas fa-envelope"></i>
+                            <strong>Email:</strong> {{ profile_user.email }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="col-md-8">
+            <!-- Biografía -->
+            {% if profile.bio %}
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Sobre mí</h5>
+                        <p class="card-text">{{ profile.bio }}</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Productos publicados con carrusel -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Productos publicados</h5>
+                        {% if profile_user.profile.products.all %}
+                            <span class="badge bg-primary">{{ profile_user.profile.products.count }} productos</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if profile_user.profile.products.all %}
+                        <!-- Carrusel de productos -->
+                        <div class="products-carousel-container position-relative">
+                            <!-- Botón izquierda -->
+                            <button class="carousel-btn carousel-btn-left" onclick="scrollCarousel(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            
+                            <!-- Productos -->
+                            <div class="products-carousel" id="productsCarousel">
+                                {% for product in profile_user.profile.products.all %}
+                                <div class="product-card-carousel">
+                                    <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">
+                                        <div class="card h-100 shadow-sm hover-card">
+                                            {% if product.image %}
+                                                <img src="{{ product.image.url }}" 
+                                                     class="card-img-top" 
+                                                     alt="{{ product.name }}" 
+                                                     style="height: 200px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                                                     style="height: 200px;">
+                                                    <span class="text-white">Sin imagen</span>
+                                                </div>
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <h6 class="card-title text-truncate">{{ product.name }}</h6>
+                                                <p class="card-text text-muted small mb-1">{{ product.category.name }}</p>
+                                                <h5 class="text-primary mb-2">${{ product.price }}</h5>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-box"></i> Stock: {{ product.stock }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Botón derecha -->
+                            <button class="carousel-btn carousel-btn-right" onclick="scrollCarousel(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Indicadores -->
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-arrows-alt-h"></i> Deslizá para ver más productos
+                            </small>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-box-open text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3">Este usuario no ha publicado productos aún.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.products-carousel-container {
+    position: relative;
+    padding: 0 50px;
+}
+
+.products-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 20px;
+    padding: 10px 0;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.products-carousel::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.product-card-carousel {
+    flex: 0 0 280px;
+    min-width: 280px;
+}
+
+.hover-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(74, 144, 226, 0.2) !important;
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #4A90E2, #2C5AA0);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    transition: all 0.3s;
+}
+
+.carousel-btn:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 16px rgba(74, 144, 226, 0.4);
+}
+
+.carousel-btn-left {
+    left: 0;
+}
+
+.carousel-btn-right {
+    right: 0;
+}
+
+.carousel-btn i {
+    font-size: 1.2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .products-carousel-container {
+        padding: 0 35px;
+    }
+    
+    .product-card-carousel {
+        flex: 0 0 220px;
+        min-width: 220px;
+    }
+    
+    .carousel-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .carousel-btn i {
+        font-size: 1rem;
+    }
+}
+</style>
+
+<script>
+function scrollCarousel(direction) {
+    const carousel = document.getElementById('productsCarousel');
+    const scrollAmount = 300; // Cantidad de píxeles a desplazar
+    
+    if (direction === 1) {
+        // Scroll derecha
+        carousel.scrollLeft += scrollAmount;
+    } else {
+        // Scroll izquierda
+        carousel.scrollLeft -= scrollAmount;
+    }
+}
+
+// También permitir scroll con toque en móvil
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.getElementById('productsCarousel');
+    if (!carousel) return;
+    
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    carousel.addEventListener('mousedown', (e) => {
+        isDown = true;
+        carousel.style.cursor = 'grabbing';
+        startX = e.pageX - carousel.offsetLeft;
+        scrollLeft = carousel.scrollLeft;
+    });
+
+    carousel.addEventListener('mouseleave', () => {
+        isDown = false;
+        carousel.style.cursor = 'grab';
+    });
+
+    carousel.addEventListener('mouseup', () => {
+        isDown = false;
+        carousel.style.cursor = 'grab';
+    });
+
+    carousel.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - carousel.offsetLeft;
+        const walk = (x - startX) * 2;
+        carousel.scrollLeft = scrollLeft - walk;
+    });
+    
+    // Cursor
+    carousel.style.cursor = 'grab';
+});
+</script>
+{% endblock %}

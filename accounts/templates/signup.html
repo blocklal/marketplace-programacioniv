@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if form.errors %}
+<div class="alert alert-danger">
+    <ul>
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="d-flex justify-content-center mt-5">
+    <div class="card shadow p-4 text-center" 
+         style="width: 420px; border-radius: 15px;">
+
+        <h3 class="mb-4">Ingresa tus datos</h3>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form action="/cuentas/signup/" method="post">
+            {% csrf_token %}
+
+            <div class="mb-3 text-start">
+                <label class="form-label">Usuario</label>
+                {{ form.username }}
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label">Correo</label>
+                {{ form.email }}
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label">Contraseña</label>
+                {{ form.password1 }}
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label">Repetir contraseña</label>
+                {{ form.password2 }}
+            </div>
+
+            <button type="submit" class="btn btn-violeta w-100 mt-2">
+                Registrarse
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
