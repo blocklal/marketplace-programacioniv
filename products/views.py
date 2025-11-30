@@ -54,7 +54,7 @@ def product_add(request):
         stock = request.POST.get('stock')
         brand = request.POST.get('brand')
         image = request.FILES.get('image')
-        owner=request.user
+        tipo_venta = request.POST.get('tipo_venta', 'venta')  # NUEVO
         
         category = Category.objects.get(id=category_id)
         product = Product.objects.create(
@@ -65,7 +65,8 @@ def product_add(request):
             stock=stock,
             brand=brand,
             image=image,
-            owner=request.user.profile
+            owner=request.user.profile,
+            tipo_venta=tipo_venta  # NUEVO
         )
         
         return redirect('product_list')
@@ -96,6 +97,7 @@ def product_edit(request, product_id):
         stock = request.POST.get('stock')
         brand = request.POST.get('brand')
         on_stock = request.POST.get('on_stock') == 'on'
+        tipo_venta = request.POST.get('tipo_venta', 'venta')  # NUEVO
         
         # Actualizar producto
         product.name = name
@@ -105,6 +107,7 @@ def product_edit(request, product_id):
         product.stock = stock
         product.brand = brand
         product.on_stock = on_stock
+        product.tipo_venta = tipo_venta  # NUEVO
         
         # Actualizar imagen si se subió una nueva
         if request.FILES.get('image'):

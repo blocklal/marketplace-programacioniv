@@ -52,8 +52,46 @@
                                       rows="4">{{ product.description }}</textarea>
                         </div>
 
+                        <!-- TIPO DE VENTA -->
+                        <div class="mb-4">
+                            <label class="form-label d-block">
+                                <strong>Tipo de transacción</strong>
+                            </label>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="tipo_venta" 
+                                               id="tipo_venta_edit" value="venta"
+                                               {% if product.tipo_venta == 'venta' %}checked{% endif %}>
+                                        <label class="form-check-label" for="tipo_venta_edit">
+                                            <strong><i class="fas fa-dollar-sign text-success"></i> Solo Venta</strong>
+                                            <small class="d-block text-muted">El producto solo estará disponible para compra</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="tipo_venta" 
+                                               id="tipo_intercambio_edit" value="intercambio"
+                                               {% if product.tipo_venta == 'intercambio' %}checked{% endif %}>
+                                        <label class="form-check-label" for="tipo_intercambio_edit">
+                                            <strong><i class="fas fa-exchange-alt text-info"></i> Solo Intercambio</strong>
+                                            <small class="d-block text-muted">El producto solo estará disponible para intercambio</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="tipo_venta" 
+                                               id="tipo_ambos_edit" value="ambos"
+                                               {% if product.tipo_venta == 'ambos' %}checked{% endif %}>
+                                        <label class="form-check-label" for="tipo_ambos_edit">
+                                            <strong><i class="fas fa-arrows-alt-h text-primary"></i> Venta o Intercambio</strong>
+                                            <small class="d-block text-muted">El producto estará disponible para ambas opciones</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3" id="precio-container-edit">
                                 <label for="price" class="form-label">Precio</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
@@ -92,7 +130,7 @@
                             <input type="checkbox" class="form-check-input" id="on_stock" name="on_stock" 
                                    {% if product.on_stock %}checked{% endif %}>
                             <label class="form-check-label" for="on_stock">
-                                Producto disponible para la venta
+                                Producto disponible
                             </label>
                         </div>
 
@@ -113,4 +151,88 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const radios = document.querySelectorAll('input[name="tipo_venta"]');
+    const precioContainer = document.getElementById('precio-container-edit');
+    const precioInput = document.getElementById('price');
+    const form = document.querySelector('form');
+    
+    function actualizarPrecio() {
+        const tipoSeleccionado = document.querySelector('input[name="tipo_venta"]:checked').value;
+        if (tipoSeleccionado === 'intercambio') {
+            precioContainer.style.opacity = '0.5';
+            precioInput.required = false;
+            precioInput.disabled = true;
+        } else {
+            precioContainer.style.opacity = '1';
+            precioInput.required = true;
+            precioInput.disabled = false;
+        }
+    }
+    
+    radios.forEach(radio => {
+        radio.addEventListener('change', actualizarPrecio);
+    });
+    
+    // Inicializar al cargar
+    actualizarPrecio();
+    
+    // Validar antes de enviar el formulario
+    form.addEventListener('submit', function(e) {
+        const tipoSeleccionado = document.querySelector('input[name="tipo_venta"]:checked').value;
+        
+        // Si incluye intercambio, mostrar advertencia
+        if (tipoSeleccionado === 'intercambio' || tipoSeleccionado === 'ambos') {
+            e.preventDefault();
+            
+            // Crear modal de advertencia
+            const modalHtml = `
+                <div class="modal fade" id="modalAdvertenciaIntercambio" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-exclamation-triangle"></i> Advertencia sobre Intercambios
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Blue Shopping no se responsabiliza del contacto y confirmación de los intercambios.</strong></p>
+                                <p>Evita perder clientes y elimina tu producto o disminuye el stock tras concluir un intercambio.</p>
+                                <p class="mb-0">Cualquier disgusto entre usuarios puede ser reportado a nuestro mail de contacto.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-warning" id="btnAceptarAdvertenciaEdit">
+                                    Entendido, continuar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Agregar modal al DOM si no existe
+            if (!document.getElementById('modalAdvertenciaIntercambio')) {
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            }
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalAdvertenciaIntercambio'));
+            modal.show();
+            
+            // Cuando acepte, enviar el formulario
+            document.getElementById('btnAceptarAdvertenciaEdit').addEventListener('click', function() {
+                modal.hide();
+                // Remover el listener para evitar loop infinito
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                newForm.submit();
+            });
+        }
+    });
+});
+</script>
 {% endblock %}

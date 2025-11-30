@@ -30,7 +30,7 @@
                         <p class="text-muted">{{ profile_user.get_full_name }}</p>
                     {% endif %}
 
-                    <!-- Botón editar (solo si es tu perfil) -->
+                    <!-- Botones de acción -->
                     {% if request.user == profile_user %}
                         <a href="{% url 'profile_edit' %}" class="btn btn-primary w-100 mt-3">
                             Editar Perfil
@@ -38,49 +38,40 @@
                         <a href="{% url 'seller_orders' %}" class="btn btn-success w-100 mt-2">
                             <i class="fas fa-store"></i> Mis Ventas
                         </a>
+                    {% else %}
+                        <!-- Botón para dejar/editar review -->
+                        {% if puede_dejar_review %}
+                            <a href="{% url 'crear_review' profile_user.username %}" class="btn btn-warning w-100 mt-3">
+                                <i class="fas fa-star"></i> 
+                                {% if mi_review %}Editar mi Review{% else %}Dejar Review{% endif %}
+                            </a>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
 
             <!-- Estadísticas de Reviews -->
             <div class="card shadow mt-3">
-                <div class="card-body">
+                <div class="card-body text-center">
                     <h5 class="card-title mb-3">Reputación</h5>
                     
-                    <!-- Como Vendedor -->
-                    <div class="mb-3 pb-3 border-bottom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-muted">Como Vendedor</span>
-                            <span class="badge bg-primary">{{ total_reviews_vendedor }} reviews</span>
-                        </div>
-                        <div class="text-warning fs-4 mt-2">
-                            {% if promedio_vendedor > 0 %}
-                                {% for i in "12345" %}
-                                    {% if forloop.counter <= promedio_vendedor %}★{% else %}☆{% endif %}
-                                {% endfor %}
-                                <span class="text-dark fs-6 ms-1">({{ promedio_vendedor }})</span>
-                            {% else %}
-                                <span class="text-muted fs-6">Sin calificaciones</span>
-                            {% endif %}
-                        </div>
+                    <div class="text-warning" style="font-size: 2.5rem;">
+                        {% if promedio > 0 %}
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= promedio %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            ☆☆☆☆☆
+                        {% endif %}
                     </div>
                     
-                    <!-- Como Comprador -->
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-muted">Como Comprador</span>
-                            <span class="badge bg-success">{{ total_reviews_comprador }} reviews</span>
-                        </div>
-                        <div class="text-warning fs-4 mt-2">
-                            {% if promedio_comprador > 0 %}
-                                {% for i in "12345" %}
-                                    {% if forloop.counter <= promedio_comprador %}★{% else %}☆{% endif %}
-                                {% endfor %}
-                                <span class="text-dark fs-6 ms-1">({{ promedio_comprador }})</span>
-                            {% else %}
-                                <span class="text-muted fs-6">Sin calificaciones</span>
-                            {% endif %}
-                        </div>
+                    <div class="mt-2">
+                        {% if promedio > 0 %}
+                            <h4 class="mb-0">{{ promedio }}</h4>
+                            <small class="text-muted">{{ total_reviews }} review{% if total_reviews != 1 %}s{% endif %}</small>
+                        {% else %}
+                            <p class="text-muted mb-0">Sin calificaciones aún</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -132,12 +123,10 @@
                     {% if profile_user.profile.products.all %}
                         <!-- Carrusel de productos -->
                         <div class="products-carousel-container position-relative">
-                            <!-- Botón izquierda -->
                             <button class="carousel-btn carousel-btn-left" onclick="scrollCarousel(-1)">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
                             
-                            <!-- Productos -->
                             <div class="products-carousel" id="productsCarousel">
                                 {% for product in profile_user.profile.products.all %}
                                 <div class="product-card-carousel">
@@ -168,13 +157,11 @@
                                 {% endfor %}
                             </div>
                             
-                            <!-- Botón derecha -->
                             <button class="carousel-btn carousel-btn-right" onclick="scrollCarousel(1)">
                                 <i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
                         
-                        <!-- Indicadores -->
                         <div class="text-center mt-3">
                             <small class="text-muted">
                                 <i class="fas fa-arrows-alt-h"></i> Deslizá para ver más productos
@@ -190,98 +177,39 @@
             </div>
 
             <!-- SECCIÓN DE REVIEWS -->
-            {% if reviews_vendedor or reviews_comprador %}
             <div class="card shadow">
                 <div class="card-body">
                     <h5 class="card-title mb-4">
-                        <i class="fas fa-star text-warning"></i> Reviews
+                        <i class="fas fa-star text-warning"></i> Reviews ({{ total_reviews }})
                     </h5>
-                    <!-- Tabs para cambiar entre tipos de review -->
-                    <ul class="nav nav-tabs mb-3" id="reviewsTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="vendedor-tab" data-bs-toggle="tab" data-bs-target="#vendedor" type="button" role="tab">
-                                Como Vendedor ({{ total_reviews_vendedor }})
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="comprador-tab" data-bs-toggle="tab" data-bs-target="#comprador" type="button" role="tab">
-                                Como Comprador ({{ total_reviews_comprador }})
-                            </button>
-                        </li>
-                    </ul>
 
-                    <div class="tab-content" id="reviewsTabContent">
-                        <!-- Reviews como Vendedor -->
-                        <div class="tab-pane fade show active" id="vendedor" role="tabpanel">
-                            {% if reviews_vendedor %}
-                                {% for review in reviews_vendedor %}
-                                <div class="review-card mb-3 p-3 border rounded">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <strong>{{ review.autor.username }}</strong>
-                                            <div class="text-warning">
-                                                {% for i in "12345" %}
-                                                    {% if forloop.counter <= review.calificacion %}★{% else %}☆{% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <small class="text-muted">{{ review.fecha_creacion|date:"d/m/Y" }}</small>
+                    {% if reviews %}
+                        {% for review in reviews %}
+                        <div class="review-card mb-3 p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <a href="{% url 'profile_view_user' review.autor.username %}" class="text-decoration-none">
+                                        <strong>{{ review.autor.username }}</strong>
+                                    </a>
+                                    <div class="text-warning" style="font-size: 1.2rem;">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.calificacion %}★{% else %}☆{% endif %}
+                                        {% endfor %}
                                     </div>
-                                    <p class="mb-1">{{ review.comentario }}</p>
-                                    <small class="text-muted">
-                                        <i class="fas fa-box"></i> {{ review.order_item.product_name }}
-                                    </small>
                                 </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fas fa-comment-slash fs-2 mb-2"></i>
-                                    <p>No hay reviews como vendedor aún.</p>
-                                </div>
-                            {% endif %}
+                                <small class="text-muted">{{ review.fecha_creacion|date:"d/m/Y" }}</small>
+                            </div>
+                            <p class="mb-0">{{ review.comentario }}</p>
                         </div>
-
-                        <!-- Reviews como Comprador -->
-                        <div class="tab-pane fade" id="comprador" role="tabpanel">
-                            {% if reviews_comprador %}
-                                {% for review in reviews_comprador %}
-                                <div class="review-card mb-3 p-3 border rounded">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <strong>{{ review.autor.username }}</strong>
-                                            <div class="text-warning">
-                                                {% for i in "12345" %}
-                                                    {% if forloop.counter <= review.calificacion %}★{% else %}☆{% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <small class="text-muted">{{ review.fecha_creacion|date:"d/m/Y" }}</small>
-                                    </div>
-                                    <p class="mb-1">{{ review.comentario }}</p>
-                                    <small class="text-muted">
-                                        <i class="fas fa-box"></i> {{ review.order_item.product_name }}
-                                    </small>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fas fa-comment-slash fs-2 mb-2"></i>
-                                    <p>No hay reviews como comprador aún.</p>
-                                </div>
-                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-comment-slash" style="font-size: 3rem;"></i>
+                            <p class="mt-3">Este usuario aún no tiene reviews.</p>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
-            {% else %}
-            <!-- Mensaje si no hay reviews -->
-            <div class="card shadow">
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-star text-muted" style="font-size: 3rem;"></i>
-                    <p class="text-muted mt-3">Este usuario aún no tiene reviews.</p>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>

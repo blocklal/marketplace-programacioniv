@@ -38,7 +38,34 @@
                         </a>
                     </p>
 
-                    <h2 class="text-primary mb-4">${{ product.price }}</h2>
+                    <!-- Tipo de transacción -->
+                    <div class="mb-3">
+                        {% if product.tipo_venta == 'venta' %}
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-dollar-sign"></i> Solo Venta
+                            </span>
+                        {% elif product.tipo_venta == 'intercambio' %}
+                            <span class="badge bg-info fs-6">
+                                <i class="fas fa-exchange-alt"></i> Solo Intercambio
+                            </span>
+                        {% elif product.tipo_venta == 'ambos' %}
+                            <span class="badge bg-success fs-6 me-1">
+                                <i class="fas fa-dollar-sign"></i> Venta
+                            </span>
+                            <span class="badge bg-info fs-6">
+                                <i class="fas fa-exchange-alt"></i> Intercambio
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Precio (solo si acepta venta) -->
+                    {% if product.acepta_venta %}
+                        <h2 class="text-primary mb-4">${{ product.price }}</h2>
+                    {% else %}
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle"></i> Este producto solo está disponible para intercambio
+                        </div>
+                    {% endif %}
 
                     <div class="mb-4">
                         <h5>Descripción</h5>
@@ -70,10 +97,25 @@
                     <!-- Botones de acción -->
                     <div class="d-grid gap-2 mb-3">
                         {% if product.stock > 0 and product.on_stock %}
-                            <button class="btn-agregar-carrito btn btn-primary btn-lg" 
-                                    data-producto-id="{{ product.id }}">
-                                <i class="fas fa-cart-plus"></i> Agregar al carrito
-                            </button>
+                            <!-- Botón comprar (solo si acepta venta) -->
+                            {% if product.acepta_venta %}
+                                <button class="btn-agregar-carrito btn btn-primary btn-lg" 
+                                        data-producto-id="{{ product.id }}">
+                                    <i class="fas fa-cart-plus"></i> Agregar al carrito
+                                </button>
+                            {% endif %}
+                            
+                            <!-- Botón intercambio -->
+                            {% if product.acepta_intercambio %}
+                                <button class="btn btn-info btn-lg text-white" data-bs-toggle="modal" data-bs-target="#modalIntercambio">
+                                    <i class="fas fa-exchange-alt"></i> 
+                                    {% if product.tipo_venta == 'intercambio' %}
+                                        Contactar para Intercambio
+                                    {% else %}
+                                        Proponer Intercambio
+                                    {% endif %}
+                                </button>
+                            {% endif %}
                         {% else %}
                             <button class="btn btn-secondary btn-lg" disabled>
                                 Sin stock
@@ -170,7 +212,11 @@
                         {% endif %}
                         <div class="card-body">
                             <h6 class="card-title">{{ related.name }}</h6>
-                            <h5 class="text-primary">${{ related.price }}</h5>
+                            {% if related.acepta_venta %}
+                                <h5 class="text-primary">${{ related.price }}</h5>
+                            {% else %}
+                                <span class="badge bg-info">Intercambio</span>
+                            {% endif %}
                         </div>
                     </div>
                 </a>
@@ -179,6 +225,65 @@
         </div>
     </div>
     {% endif %}
+</div>
+
+<!-- Modal de Intercambio -->
+<div class="modal fade" id="modalIntercambio" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exchange-alt"></i> Información de Contacto para Intercambio
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    {% if product.owner.profile_picture %}
+                        <img src="{{ product.owner.profile_picture.url }}" 
+                             alt="{{ product.owner.user.username }}" 
+                             class="rounded-circle mb-2" 
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-2" 
+                             style="width: 80px; height: 80px;">
+                            <span class="text-white fs-3">{{ product.owner.user.username|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                    <h5>{{ product.owner.user.username }}</h5>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Contacta al vendedor para coordinar el intercambio
+                </div>
+
+                {% if product.owner.phone %}
+                <div class="mb-3">
+                    <strong><i class="fas fa-phone"></i> Teléfono:</strong>
+                    <a href="tel:{{ product.owner.phone }}" class="ms-2">{{ product.owner.phone }}</a>
+                </div>
+                {% endif %}
+
+                {% if product.owner.user.email %}
+                <div class="mb-3">
+                    <strong><i class="fas fa-envelope"></i> Email:</strong>
+                    <a href="mailto:{{ product.owner.user.email }}" class="ms-2">{{ product.owner.user.email }}</a>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <strong><i class="fas fa-box"></i> Producto:</strong>
+                    <span class="ms-2">{{ product.name }}</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{% url 'profile_view_user' product.owner.user.username %}" class="btn btn-primary">
+                    <i class="fas fa-user"></i> Ver Perfil Completo
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -192,119 +297,113 @@
 </style>
 
 <script>
-
 document.addEventListener('DOMContentLoaded', function() {
     const btnCarrito = document.querySelector('.btn-agregar-carrito');
-    if (!btnCarrito) return;
-    
-    let procesando = false;
-    
-    btnCarrito.addEventListener('click', function() {
-        if (procesando) return;
-        procesando = true;
+    if (btnCarrito) {
+        let procesando = false;
         
-        const productoId = this.dataset.productoId;
-        const button = this;
-        const originalText = button.innerHTML;
-        
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
-        
-        fetch(`/carrito/add/${productoId}/`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                // Actualizar contador del carrito
-                const contadorCarrito = document.querySelector('.contador-carrito');
-                if (contadorCarrito) {
-                    const actual = parseInt(contadorCarrito.textContent) || 0;
-                    contadorCarrito.textContent = actual + 1;
-                    contadorCarrito.style.display = 'inline';
+        btnCarrito.addEventListener('click', function() {
+            if (procesando) return;
+            procesando = true;
+            
+            const productoId = this.dataset.productoId;
+            const button = this;
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+            
+            fetch(`/carrito/add/${productoId}/`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
                 }
-                
-                // Feedback visual
-                button.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-success');
-                
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.classList.remove('btn-success');
-                    button.classList.add('btn-primary');
-                    button.disabled = false;
-                    procesando = false;
-                }, 2000);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            button.innerHTML = originalText;
-            button.disabled = false;
-            procesando = false;
-        });
-    });
-});
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.querySelector('.btn-favorito-detalle');
-    if (!btn) return;
-    
-    let procesando = false;
-    
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        if (procesando) return;
-        procesando = true;
-        
-        const productoId = this.dataset.productoId;
-        const icon = this.querySelector('i');
-        const texto = this.querySelector('.texto-fav');
-        
-        this.disabled = true;
-        
-        fetch(`/favoritos/toggle/${productoId}/`, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                if (data.es_favorito) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                    texto.textContent = 'En favoritos';
-                } else {
-                    icon.classList.remove('fas');
-                    icon.classList.add('far');
-                    texto.textContent = 'Agregar a favoritos';
-                }
-                
-                // Actualizar contador en el navbar
-                const contadorFav = document.querySelector('.contador-favoritos');
-                if (contadorFav) {
-                    const actual = parseInt(contadorFav.textContent) || 0;
-                    const nuevo = data.es_favorito ? actual + 1 : actual - 1;
-                    contadorFav.textContent = nuevo;
+            })
+            .then(response => {
+                if (response.ok) {
+                    const contadorCarrito = document.querySelector('.contador-carrito');
+                    if (contadorCarrito) {
+                        const actual = parseInt(contadorCarrito.textContent) || 0;
+                        contadorCarrito.textContent = actual + 1;
+                        contadorCarrito.style.display = 'inline';
+                    }
                     
-                    // Mostrar/ocultar badge si es 0
-                    if (nuevo === 0) {
-                        contadorFav.style.display = 'none';
+                    button.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-primary');
+                        button.disabled = false;
+                        procesando = false;
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                button.innerHTML = originalText;
+                button.disabled = false;
+                procesando = false;
+            });
+        });
+    }
+
+    const btnFav = document.querySelector('.btn-favorito-detalle');
+    if (btnFav) {
+        let procesando = false;
+        
+        btnFav.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (procesando) return;
+            procesando = true;
+            
+            const productoId = this.dataset.productoId;
+            const icon = this.querySelector('i');
+            const texto = this.querySelector('.texto-fav');
+            
+            this.disabled = true;
+            
+            fetch(`/favoritos/toggle/${productoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.es_favorito) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        texto.textContent = 'En favoritos';
                     } else {
-                        contadorFav.style.display = 'inline';
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        texto.textContent = 'Agregar a favoritos';
+                    }
+                    
+                    const contadorFav = document.querySelector('.contador-favoritos');
+                    if (contadorFav) {
+                        const actual = parseInt(contadorFav.textContent) || 0;
+                        const nuevo = data.es_favorito ? actual + 1 : actual - 1;
+                        contadorFav.textContent = nuevo;
+                        
+                        if (nuevo === 0) {
+                            contadorFav.style.display = 'none';
+                        } else {
+                            contadorFav.style.display = 'inline';
+                        }
                     }
                 }
-            }
-        })
-    });
+                this.disabled = false;
+                procesando = false;
+            });
+        });
+    }
 });
 
 function getCookie(name) {

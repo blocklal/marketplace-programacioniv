@@ -88,15 +88,8 @@ class OrderItem(models.Model):
     
 
 class Review(models.Model):
-    TIPO_CHOICES = [
-        ('vendedor', 'Review a Vendedor'),
-        ('comprador', 'Review a Comprador'),
-    ]
-    
     autor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews_escritas')
     receptor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews_recibidas')
-    order_item = models.ForeignKey(OrderItem, on_delete=models.CASCADE, related_name='reviews')
-    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
     
     calificacion = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
@@ -106,7 +99,7 @@ class Review(models.Model):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ['autor', 'order_item', 'tipo']  # Una review de cada tipo por item
+        unique_together = ['autor', 'receptor']  # Una review por cada par de usuarios
         ordering = ['-fecha_creacion']
         verbose_name = 'Review'
         verbose_name_plural = 'Reviews'
@@ -119,30 +112,33 @@ class Review(models.Model):
     
     def clean(self):
         """Validaciones personalizadas"""
-        order = self.order_item.order
-        
-        # Verificar que el pedido esté entregado
-        if order.status != 'delivered':
-            raise ValidationError('Solo puedes dejar reviews en pedidos entregados.')
-        
-        # Validar según el tipo de review
-        if self.tipo == 'vendedor':
-            # El comprador revisa al vendedor
-            if self.autor != order.user:
-                raise ValidationError('Solo el comprador puede dejar review al vendedor.')
-            if self.receptor != self.order_item.seller:
-                raise ValidationError('El receptor debe ser el vendedor del producto.')
-        
-        elif self.tipo == 'comprador':
-            # El vendedor revisa al comprador
-            if self.autor != self.order_item.seller:
-                raise ValidationError('Solo el vendedor puede dejar review al comprador.')
-            if self.receptor != order.user:
-                raise ValidationError('El receptor debe ser el comprador.')
-        
         # No puedes dejarte una review a ti mismo
         if self.autor == self.receptor:
             raise ValidationError('No puedes dejarte una review a ti mismo.')
+        
+        # Verificar que haya al menos una transacción entre ellos
+        if not self.tienen_transaccion():
+            raise ValidationError('Debes tener al menos una compra/venta con este usuario para dejar una review.')
+    
+    def tienen_transaccion(self):
+        """Verifica si hay al menos una transacción entre autor y receptor"""
+        from orders.models import Order, OrderItem
+        
+        # Caso 1: Autor compró algo al receptor
+        compro_a = OrderItem.objects.filter(
+            order__user=self.autor,
+            seller=self.receptor,
+            order__status='delivered'
+        ).exists()
+        
+        # Caso 2: Autor vendió algo al receptor
+        vendio_a = OrderItem.objects.filter(
+            order__user=self.receptor,
+            seller=self.autor,
+            order__status='delivered'
+        ).exists()
+        
+        return compro_a or vendio_a
     
     def save(self, *args, **kwargs):
         self.clean()

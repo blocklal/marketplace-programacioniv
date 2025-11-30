@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.db import IntegrityError
 from .forms import CustomUserCreationForm
 from django.contrib.auth.models import User
-from orders.models import Review
+from orders.models import Review, OrderItem
 from django.db.models import Avg
 
 # Create your views here.
@@ -70,26 +70,42 @@ def profile_view(request, username=None):
     
     profile = profile_user.profile
     
-    # Reviews
-    reviews_vendedor = Review.objects.filter(receptor=profile_user, tipo='vendedor').select_related('autor', 'order_item')
-    reviews_comprador = Review.objects.filter(receptor=profile_user, tipo='comprador').select_related('autor', 'order_item')
+    # Reviews recibidas (simplificado: una review por persona)
+    reviews = Review.objects.filter(receptor=profile_user).select_related('autor')
     
-    # Calcular promedios
-    promedio_vendedor = reviews_vendedor.aggregate(Avg('calificacion'))['calificacion__avg']
-    promedio_comprador = reviews_comprador.aggregate(Avg('calificacion'))['calificacion__avg']
+    # Calcular promedio general
+    promedio = reviews.aggregate(Avg('calificacion'))['calificacion__avg']
+    promedio = round(promedio, 1) if promedio else 0
     
-    promedio_vendedor = round(promedio_vendedor, 1) if promedio_vendedor else 0
-    promedio_comprador = round(promedio_comprador, 1) if promedio_comprador else 0
+    # Verificar si el usuario actual puede dejar review
+    puede_dejar_review = False
+    mi_review = None
+    
+    if request.user.is_authenticated and request.user != profile_user:
+        # Verificar si hay transacción completada entre ellos
+        compro_a = OrderItem.objects.filter(
+            order__user=request.user,
+            seller=profile_user,
+            order__status='delivered'
+        ).exists()
+        
+        vendio_a = OrderItem.objects.filter(
+            order__user=profile_user,
+            seller=request.user,
+            order__status='delivered'
+        ).exists()
+        
+        puede_dejar_review = compro_a or vendio_a
+        mi_review = Review.objects.filter(autor=request.user, receptor=profile_user).first()
     
     context = {
         'profile_user': profile_user,
         'profile': profile,
-        'reviews_vendedor': reviews_vendedor,
-        'reviews_comprador': reviews_comprador,
-        'promedio_vendedor': promedio_vendedor,
-        'promedio_comprador': promedio_comprador,
-        'total_reviews_vendedor': reviews_vendedor.count(),
-        'total_reviews_comprador': reviews_comprador.count(),
+        'reviews': reviews,
+        'promedio': promedio,
+        'total_reviews': reviews.count(),
+        'puede_dejar_review': puede_dejar_review,
+        'mi_review': mi_review,
     }
     return render(request, 'profiles/profile.html', context)
 

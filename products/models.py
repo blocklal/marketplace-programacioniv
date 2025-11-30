@@ -5,20 +5,33 @@ from accounts.models import Profile
 #seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="products")
 
 class Product(models.Model):
+    TIPO_VENTA_CHOICES = [
+        ('venta', 'Solo Venta'),
+        ('intercambio', 'Solo Intercambio'),
+        ('ambos', 'Venta o Intercambio'),
+    ]
+    
     name = models.CharField(max_length=50)
     owner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
     category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='products')
     description = models.TextField(blank=True)
     stock = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=12, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     brand = models.CharField(blank=True, max_length=50, default="Genérico")
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     on_stock = models.BooleanField(default=True)
+    tipo_venta = models.CharField(max_length=20, choices=TIPO_VENTA_CHOICES, default='venta')
     creation_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+    
+    def acepta_venta(self):
+        return self.tipo_venta in ['venta', 'ambos']
+    
+    def acepta_intercambio(self):
+        return self.tipo_venta in ['intercambio', 'ambos']
     
 class Category(models.Model):
     name = models.CharField(max_length=50)

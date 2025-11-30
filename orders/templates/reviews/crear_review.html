@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if review_existente %}Editar Review{% else %}Dejar Review{% endif %} - {{ receptor.username }}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-star"></i>
+                        {% if review_existente %}
+                            Editar Review para {{ receptor.username }}
+                        {% else %}
+                            Dejar Review para {{ receptor.username }}
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Información de transacción -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="mb-2"><i class="fas fa-info-circle"></i> Relación comercial:</h6>
+                        <ul class="mb-0">
+                            {% if compro_a %}
+                                <li>Has comprado productos de {{ receptor.username }}</li>
+                            {% endif %}
+                            {% if vendio_a %}
+                                <li>Has vendido productos a {{ receptor.username }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Calificación con estrellas -->
+                        <div class="mb-4">
+                            <label class="form-label"><strong>Calificación *</strong></label>
+                            <div class="rating-stars">
+                                <input type="radio" name="calificacion" value="5" id="star5" 
+                                    {% if review_existente.calificacion == 5 %}checked{% endif %} required>
+                                <label for="star5" title="5 estrellas">★</label>
+                                
+                                <input type="radio" name="calificacion" value="4" id="star4"
+                                    {% if review_existente.calificacion == 4 %}checked{% endif %}>
+                                <label for="star4" title="4 estrellas">★</label>
+                                
+                                <input type="radio" name="calificacion" value="3" id="star3"
+                                    {% if review_existente.calificacion == 3 %}checked{% endif %}>
+                                <label for="star3" title="3 estrellas">★</label>
+                                
+                                <input type="radio" name="calificacion" value="2" id="star2"
+                                    {% if review_existente.calificacion == 2 %}checked{% endif %}>
+                                <label for="star2" title="2 estrellas">★</label>
+                                
+                                <input type="radio" name="calificacion" value="1" id="star1"
+                                    {% if review_existente.calificacion == 1 %}checked{% endif %}>
+                                <label for="star1" title="1 estrella">★</label>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                Selecciona de 1 a 5 estrellas
+                            </small>
+                        </div>
+
+                        <!-- Comentario -->
+                        <div class="mb-4">
+                            <label for="comentario" class="form-label"><strong>Comentario *</strong></label>
+                            <textarea 
+                                class="form-control" 
+                                id="comentario" 
+                                name="comentario" 
+                                rows="6" 
+                                maxlength="1000"
+                                placeholder="Describe tu experiencia con este usuario (comunicación, calidad, cumplimiento, etc.)"
+                                required
+                            >{% if review_existente %}{{ review_existente.comentario }}{% endif %}</textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">Máximo 1000 caracteres</small>
+                                <small class="text-muted" id="charCount">0 / 1000</small>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-paper-plane"></i>
+                                {% if review_existente %}Actualizar Review{% else %}Enviar Review{% endif %}
+                            </button>
+                            <a href="{% url 'profile_view_user' receptor.username %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Perfil del usuario -->
+            <div class="card shadow mt-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Sobre {{ receptor.username }}</h5>
+                    <div class="d-flex align-items-center">
+                        {% if receptor.profile.profile_picture %}
+                            <img src="{{ receptor.profile.profile_picture.url }}" 
+                                 alt="{{ receptor.username }}" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 60px; height: 60px;">
+                                <span class="text-white fs-4">{{ receptor.username|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h6 class="mb-1">{{ receptor.username }}</h6>
+                            {% if receptor.profile.bio %}
+                                <p class="text-muted small mb-0">{{ receptor.profile.bio|truncatewords:20 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'profile_view_user' receptor.username %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-user"></i> Ver perfil completo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estrellas interactivas */
+.rating-stars {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 3rem;
+}
+
+.rating-stars input[type="radio"] {
+    display: none;
+}
+
+.rating-stars label {
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rating-stars label:hover {
+    transform: scale(1.1);
+}
+
+.rating-stars input[type="radio"]:checked ~ label,
+.rating-stars label:hover,
+.rating-stars label:hover ~ label {
+    color: #ffc107;
+}
+
+/* Animación al seleccionar */
+.rating-stars input[type="radio"]:checked ~ label {
+    animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .rating-stars {
+        font-size: 2.5rem;
+        gap: 5px;
+    }
+}
+</style>
+
+<script>
+// Contador de caracteres
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('comentario');
+    const charCount = document.getElementById('charCount');
+    
+    function updateCount() {
+        const length = textarea.value.length;
+        charCount.textContent = `${length} / 1000`;
+        
+        if (length > 900) {
+            charCount.classList.add('text-danger');
+            charCount.classList.remove('text-muted');
+        } else {
+            charCount.classList.add('text-muted');
+            charCount.classList.remove('text-danger');
+        }
+    }
+    
+    textarea.addEventListener('input', updateCount);
+    updateCount(); // Inicializar
+});
+</script>
+{% endblock %}

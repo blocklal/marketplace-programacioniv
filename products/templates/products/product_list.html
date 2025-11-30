@@ -76,6 +76,22 @@
     {% for product in products %}
     <div class="col-md-4 mb-4">
         <div class="card h-100 hover-shadow position-relative" style="transition: transform 0.2s;">
+            <!-- Badge de tipo de transacción -->
+            <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
+                {% if product.tipo_venta == 'intercambio' %}
+                    <span class="badge bg-info">
+                        <i class="fas fa-exchange-alt"></i> Intercambio
+                    </span>
+                {% elif product.tipo_venta == 'ambos' %}
+                    <span class="badge bg-success me-1">
+                        <i class="fas fa-dollar-sign"></i> Venta
+                    </span>
+                    <span class="badge bg-info">
+                        <i class="fas fa-exchange-alt"></i> Intercambio
+                    </span>
+                {% endif %}
+            </div>
+
             <!-- Botón de favoritos flotante -->
             {% if request.user.is_authenticated %}
             {% es_favorito request.user product as is_fav %}
@@ -98,7 +114,16 @@
                     <h5 class="card-title">{{ product.name }}</h5>
                     <p class="card-text text-muted">{{ product.category.name }}</p>
                     <p class="card-text">{{ product.description|truncatewords:15 }}</p>
-                    <h4 class="text-primary">${{ product.price }}</h4>
+                    
+                    <!-- Mostrar precio solo si acepta venta -->
+                    {% if product.acepta_venta %}
+                        <h4 class="text-primary">${{ product.price }}</h4>
+                    {% else %}
+                        <div class="alert alert-info py-2 mb-2">
+                            <small><i class="fas fa-info-circle"></i> Solo intercambio</small>
+                        </div>
+                    {% endif %}
+
                     <small class="text-muted">
                         Stock: {{ product.stock }} | Marca: {{ product.brand }}
                         <br>
@@ -107,13 +132,23 @@
                         {% endif %}
                     </small>
                     
-                    <!-- Botón agregar al carrito -->
+                    <!-- Botones de acción -->
                     <div class="mt-3">
                         {% if product.stock > 0 and product.on_stock %}
-                            <button class="btn-agregar-carrito-lista btn btn-primary w-100" 
-                                    data-producto-id="{{ product.id }}">
-                                <i class="fas fa-cart-plus"></i> Agregar al carrito
-                            </button>
+                            {% if product.acepta_venta %}
+                                <!-- Botón agregar al carrito -->
+                                <button class="btn-agregar-carrito-lista btn btn-primary w-100 mb-2" 
+                                        data-producto-id="{{ product.id }}">
+                                    <i class="fas fa-cart-plus"></i> Agregar al carrito
+                                </button>
+                            {% endif %}
+                            
+                            {% if product.acepta_intercambio %}
+                                <!-- Botón de intercambio -->
+                                <a href="{% url 'product_detail' product.id %}" class="btn btn-info w-100 text-white">
+                                    <i class="fas fa-exchange-alt"></i> Ver para Intercambio
+                                </a>
+                            {% endif %}
                         {% else %}
                             <button class="btn btn-secondary w-100" disabled>
                                 Sin stock
@@ -154,6 +189,10 @@
 
 .btn-favorito i {
     font-size: 1.2rem;
+}
+
+.badge {
+    font-size: 0.75rem;
 }
 </style>
 

@@ -20,8 +20,8 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['autor', 'receptor', 'tipo', 'calificacion', 'order_item', 'fecha_creacion']
-    list_filter = ['tipo', 'calificacion', 'fecha_creacion']
+    list_display = ['autor', 'receptor', 'calificacion', 'fecha_creacion']
+    list_filter = ['calificacion', 'fecha_creacion']
     search_fields = ['autor__username', 'receptor__username', 'comentario']
     readonly_fields = ['fecha_creacion']
     

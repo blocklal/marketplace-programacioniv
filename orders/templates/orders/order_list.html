@@ -76,10 +76,12 @@
                                                     {% if forloop.counter <= item.user_review.calificacion %}★{% else %}☆{% endif %}
                                                 {% endfor %}
                                             </span>
-                                            <small class="text-muted">Tu calificación</small>
+                                            <small class="text-muted">
+                                                <a href="{% url 'crear_review' item.seller.username %}" class="text-decoration-none">Editar</a>
+                                            </small>
                                         </div>
                                     {% else %}
-                                        <a href="{% url 'crear_review_vendedor' item.id %}" class="btn btn-sm btn-warning">
+                                        <a href="{% url 'crear_review' item.seller.username %}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-star"></i> Dejar Review
                                         </a>
                                     {% endif %}
