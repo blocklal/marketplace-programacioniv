@@ -2,17 +2,16 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
-from django.db import IntegrityError
+from django.contrib.auth.forms import SetPasswordForm, PasswordChangeForm
 from .forms import CustomUserCreationForm
 from django.contrib.auth.models import User
 from orders.models import Review, OrderItem
 from django.db.models import Avg
 from django.contrib import messages
 from products.models import Product, Category
-from django.db.models import Sum, Q, Count
+from django.db.models import Sum, Q
 
 
 def home(request):
@@ -90,6 +89,74 @@ def signout(request):
     return render(request, 'logout.html')
 
 @login_required
+def set_password(request):
+    """Permite a usuarios de social auth establecer una contraseña"""
+    if request.method == 'POST':
+        form = SetPasswordForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Contraseña establecida correctamente. Ahora podés iniciar sesión con email y contraseña.')
+            return redirect('profile_view')
+    else:
+        form = SetPasswordForm(request.user)
+    
+    return render(request, 'set_password.html', {'form': form})
+
+
+@login_required
+def change_username(request):
+    """Cambiar nombre de usuario"""
+    if request.method == 'POST':
+        new_username = request.POST.get('new_username', '').strip()
+        
+        if not new_username:
+            messages.error(request, 'El nombre de usuario no puede estar vacío')
+            return render(request, 'change_username.html')
+        
+        # Verificar que no exista
+        if User.objects.filter(username=new_username).exclude(id=request.user.id).exists():
+            messages.error(request, 'Este nombre de usuario ya está en uso')
+            return render(request, 'change_username.html')
+        
+        # Verificar longitud
+        if len(new_username) < 3:
+            messages.error(request, 'El nombre de usuario debe tener al menos 3 caracteres')
+            return render(request, 'change_username.html')
+        
+        old_username = request.user.username
+        request.user.username = new_username
+        request.user.save()
+        
+        messages.success(request, f'Tu nombre de usuario ha sido cambiado de "{old_username}" a "{new_username}"')
+        return redirect('profile_view')
+    
+    return render(request, 'change_username.html')
+
+
+@login_required
+def change_password(request):
+    """Cambiar contraseña"""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Importante: actualizar la sesión para que no cierre sesión
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Tu contraseña ha sido actualizada exitosamente')
+            return redirect('profile_view')
+        else:
+            # Mostrar errores del formulario
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    context = {
+        'form': form
+    }
+    return render(request, 'change_password.html', context)
+
+@login_required
 def profile_view(request, username=None):
     if username is None:
         profile_user = request.user
@@ -155,7 +222,42 @@ def profile_edit(request):
         messages.success(request, 'Perfil actualizado exitosamente')
         return redirect('profile_view')
     
+    # Verificar si tiene cuentas sociales conectadas (con allauth)
+    from allauth.socialaccount.models import SocialAccount
+    
+    google_connected = SocialAccount.objects.filter(
+        user=request.user, 
+        provider='google'
+    ).exists()
+    
+    facebook_connected = SocialAccount.objects.filter(
+        user=request.user, 
+        provider='facebook'
+    ).exists()
+    
+    # Obtener emails de las cuentas sociales
+    google_email = None
+    facebook_email = None
+    
+    if google_connected:
+        google_account = SocialAccount.objects.filter(
+            user=request.user, 
+            provider='google'
+        ).first()
+        google_email = google_account.extra_data.get('email') if google_account else None
+    
+    if facebook_connected:
+        facebook_account = SocialAccount.objects.filter(
+            user=request.user, 
+            provider='facebook'
+        ).first()
+        facebook_email = facebook_account.extra_data.get('email') if facebook_account else None
+    
     context = {
-        'profile': profile
+        'profile': profile,
+        'google_connected': google_connected,
+        'facebook_connected': facebook_connected,
+        'google_email': google_email,
+        'facebook_email': facebook_email,
     }
     return render(request, 'profiles/profile_edit.html', context)

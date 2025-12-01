@@ -4,18 +4,16 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="mb-4">Finalizar Compra</h1>
+    <h1 class="mb-4">Finalizar compra</h1>
 
     <div class="row">
-        <!-- Formulario de envío y pago -->
         <div class="col-md-7">
             <form method="post" action="{% url 'create_order' %}">
                 {% csrf_token %}
 
-                <!-- Información de envío -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title mb-4">Información de Envío</h5>
+                        <h5 class="card-title mb-4">Información de envío</h5>
 
                         <div class="mb-3">
                             <label for="shipping_address" class="form-label">Dirección</label>
@@ -44,16 +42,15 @@
                     </div>
                 </div>
 
-                <!-- Método de pago -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title mb-4">Método de Pago</h5>
+                        <h5 class="card-title mb-4">Método de pago</h5>
 
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="payment_method" 
                                    id="credit_card" value="credit_card" checked>
                             <label class="form-check-label" for="credit_card">
-                                <i class="bi bi-credit-card"></i> Tarjeta de Crédito
+                                <i class="bi bi-credit-card"></i> Tarjeta de crédito
                             </label>
                         </div>
 
@@ -61,7 +58,7 @@
                             <input class="form-check-input" type="radio" name="payment_method" 
                                    id="debit_card" value="debit_card">
                             <label class="form-check-label" for="debit_card">
-                                <i class="bi bi-credit-card-2-front"></i> Tarjeta de Débito
+                                <i class="bi bi-credit-card-2-front"></i> Tarjeta de débito
                             </label>
                         </div>
 
@@ -77,7 +74,7 @@
                             <input class="form-check-input" type="radio" name="payment_method" 
                                    id="transfer" value="transfer">
                             <label class="form-check-label" for="transfer">
-                                <i class="bi bi-bank"></i> Transferencia Bancaria
+                                <i class="bi bi-bank"></i> Transferencia bancaria
                             </label>
                         </div>
 
@@ -91,18 +88,16 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-lg w-100">
-                    Confirmar Compra
+                    Confirmar compra
                 </button>
             </form>
         </div>
 
-        <!-- Resumen del pedido -->
         <div class="col-md-5">
             <div class="card shadow-sm sticky-top" style="top: 20px;">
                 <div class="card-body">
-                    <h5 class="card-title mb-4">Resumen del Pedido</h5>
+                    <h5 class="card-title mb-4">Resumen del pedido</h5>
 
-                    <!-- Items -->
                     <div class="mb-3">
                         {% for item in cart.items.all %}
                         <div class="d-flex justify-content-between mb-2">
@@ -120,7 +115,6 @@
 
                     <hr>
 
-                    <!-- Totales -->
                     <div class="d-flex justify-content-between mb-2">
                         <span>Subtotal</span>
                         <span>${{ cart.get_total }}</span>

@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 {% load favoritos_tags %}
 
-{% block title %}Productos - Blue Shopping{% endblock %}
+{% block title %}Productos - Blue shopping{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
+    <div class="container-xl">
     <div class="row">
+
         <div class="col-lg-3 col-md-4 mb-4">
             <div class="filters-sidebar">
                 <div class="card shadow-sm mb-3">
@@ -16,6 +18,7 @@
                     </div>
                     <div class="card-body">
                         <form method="get" action="{% url 'product_list' %}" id="filterForm">
+                            
                             <div class="mb-4">
                                 <label class="form-label fw-bold">
                                     <i class="fas fa-search"></i> Buscar
@@ -33,6 +36,7 @@
                                 <label class="form-label fw-bold">
                                     <i class="fas fa-handshake"></i> Tipo de Transacción
                                 </label>
+
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipo_venta" 
                                             id="tipo_todos" value="" {% if not tipo_venta %}checked{% endif %} onchange="this.form.submit()">
@@ -40,25 +44,28 @@
                                         Todos
                                     </label>
                                 </div>
+
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipo_venta" 
                                             id="tipo_venta_filter" value="venta" {% if tipo_venta == 'venta' %}checked{% endif %} onchange="this.form.submit()">
                                     <label class="form-check-label" for="tipo_venta_filter">
-                                        <i class="fas fa-dollar-sign text-success"></i> Solo Venta
+                                        <i class="fas fa-dollar-sign text-success"></i> Solo venta
                                     </label>
                                 </div>
+
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipo_venta" 
                                             id="tipo_intercambio_filter" value="intercambio" {% if tipo_venta == 'intercambio' %}checked{% endif %} onchange="this.form.submit()">
                                     <label class="form-check-label" for="tipo_intercambio_filter">
-                                        <i class="fas fa-exchange-alt text-info"></i> Solo Intercambio
+                                        <i class="fas fa-exchange-alt text-info"></i> Solo intercambio
                                     </label>
                                 </div>
+
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipo_venta" 
                                             id="tipo_ambos_filter" value="ambos" {% if tipo_venta == 'ambos' %}checked{% endif %} onchange="this.form.submit()">
                                     <label class="form-check-label" for="tipo_ambos_filter">
-                                        <i class="fas fa-arrows-alt-h text-primary"></i> Venta e Intercambio
+                                        <i class="fas fa-arrows-alt-h text-primary"></i> Venta e intercambio
                                     </label>
                                 </div>
                             </div>
@@ -83,6 +90,24 @@
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold">
+                                    <i class="fas fa-eye"></i> Disponibilidad
+                                </label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="mostrar_agotados"
+                                           id="mostrar_agotados" value="true"
+                                           {% if mostrar_agotados == 'true' %}checked{% endif %}
+                                           onchange="this.form.submit()">
+                                    <label class="form-check-label" for="mostrar_agotados">
+                                        Mostrar productos agotados
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block mt-1">Desmarca para ocultar productos sin stock (stock ≤ 0).</small>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
                                     <i class="fas fa-th-large"></i> Categoría
                                 </label>
                                 <select class="form-select" name="category" id="category_select">
@@ -101,11 +126,10 @@
                                 </label>
                                 <div id="subcategory_container">
                                     <div class="alert alert-light small mb-0 p-2">
-                                    Primero selecciona una categoría.
+                                        Primero selecciona una categoría.
                                     </div>
                                 </div>
                             </div>
-                            
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold">
@@ -117,7 +141,7 @@
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-dollar-sign"></i> Rango de Precio
+                                    <i class="fas fa-dollar-sign"></i> Rango de precio
                                 </label>
                                 <div class="row g-2">
                                     <div class="col-6">
@@ -133,12 +157,13 @@
 
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-search"></i> Aplicar Filtros
+                                    <i class="fas fa-search"></i> Aplicar filtros
                                 </button>
                                 <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
                                     <i class="fas fa-redo"></i> Limpiar
                                 </a>
-                            </div>
+                             </div>
+
                         </form>
                     </div>
                 </div>
@@ -147,12 +172,12 @@
                 <div class="card shadow-sm mt-3" id="favoritosCard">
                     <div class="card-body text-center">
                         <i class="fas fa-heart text-danger" style="font-size: 2rem;"></i>
-                        <h6 class="mt-2">Mis Favoritos</h6>
+                        <h6 class="mt-2">Mis favoritos</h6>
                         <p class="text-muted small mb-2">
                             Tenés <span id="contadorFavoritosSidebar">0</span> productos guardados
                         </p>
                         <a href="{% url 'lista_favoritos' %}" class="btn btn-sm btn-outline-danger">
-                            Ver Favoritos
+                            Ver favoritos
                         </a>
                     </div>
                 </div>
@@ -174,9 +199,10 @@
                         {% endif %}
                     </p>
                 </div>
+
                 {% if user.is_authenticated %}
                 <a href="{% url 'product_add' %}" class="btn btn-success">
-                    <i class="fas fa-plus-circle"></i> Agregar Producto
+                    <i class="fas fa-plus-circle"></i> Agregar producto
                 </a>
                 {% endif %}
             </div>
@@ -185,33 +211,29 @@
                 {% for product in products %}
                 <div class="col-xl-4 col-lg-6 col-md-12 mb-4">
                     <div class="card product-card h-100 shadow-sm">
+
+                        <!-- Badges -->
                         <div class="position-absolute top-0 start-0 m-2" style="z-index: 5;">
                             {% if product.en_oferta %}
                                 <span class="badge bg-danger mb-1">
                                     <i class="fas fa-fire"></i> {{ product.porcentaje_descuento }}% OFF
-                                </span>
-                                <br>
+                                </span><br>
                             {% endif %}
+
                             {% if product.tipo_venta == 'intercambio' %}
-                                <span class="badge bg-info">
-                                    <i class="fas fa-exchange-alt"></i> Intercambio
-                                </span>
+                                <span class="badge bg-info"><i class="fas fa-exchange-alt"></i> Intercambio</span>
                             {% elif product.tipo_venta == 'ambos' %}
-                                <span class="badge bg-success me-1">
-                                    <i class="fas fa-dollar-sign"></i> Venta
-                                </span>
-                                <span class="badge bg-info">
-                                    <i class="fas fa-exchange-alt"></i> Intercambio
-                                </span>
+                                <span class="badge bg-success me-1"><i class="fas fa-dollar-sign"></i> Venta</span>
+                                <span class="badge bg-info"><i class="fas fa-exchange-alt"></i> Intercambio</span>
                             {% endif %}
                         </div>
 
                         {% if request.user.is_authenticated %}
-                        {% es_favorito request.user product as is_fav %}
-                        <button class="btn-favorito position-absolute top-0 end-0 m-2" 
-                                data-producto-id="{{ product.id }}">
-                            <i class="{% if is_fav %}fas{% else %}far{% endif %} fa-heart"></i>
-                        </button>
+                            {% es_favorito request.user product as is_fav %}
+                            <button class="btn-favorito position-absolute top-0 end-0 m-2" 
+                                    data-producto-id="{{ product.id }}">
+                                <i class="{% if is_fav %}fas{% else %}far{% endif %} fa-heart"></i>
+                            </button>
                         {% endif %}
 
                         <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
@@ -228,9 +250,10 @@
                         </a>
 
                         <div class="card-body d-flex flex-column">
+                            
                             <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">
                                 <h6 class="card-title product-title">{{ product.name }}</h6>
-                                
+
                                 <p class="text-muted small mb-2">
                                     <i class="fas fa-tag"></i> {{ product.category.name }} 
                                     {% if product.subcategory %}
@@ -238,7 +261,7 @@
                                         <span class="fw-bold">{{ product.subcategory.name }}</span>
                                     {% endif %}
                                 </p>
-                                
+
                                 <p class="card-text text-muted small product-description">
                                     {{ product.description|truncatewords:12 }}
                                 </p>
@@ -270,36 +293,44 @@
 
                             <div class="mt-auto">
                                 {% if user.is_authenticated and product.owner == user.profile %}
-                                    <!-- Si es el dueño -->
                                     <a href="{% url 'product_edit' product.id %}" class="btn btn-warning w-100 mb-2">
-                                        <i class="fas fa-edit"></i> Editar mi Producto
+                                        <i class="fas fa-edit"></i> Editar mi producto
                                     </a>
                                 {% else %}
-                                    <!-- Si NO es el dueño -->
-                                    {% if product.stock > 0 and product.on_stock %}
+
+                                    {% if not product.on_stock %}
+                                        <button class="btn btn-danger w-100" disabled>
+                                            <i class="fas fa-ban"></i> No disponible
+                                        </button>
+                                    {% elif product.stock > 0 %}
+
                                         {% if product.tipo_venta == 'venta' or product.tipo_venta == 'ambos' %}
                                             <button class="btn-agregar-carrito-lista btn btn-primary w-100 mb-2" 
                                                     data-producto-id="{{ product.id }}">
-                                                <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                                                <i class="fas fa-cart-plus"></i> Agregar al carrito
                                             </button>
                                         {% endif %}
-                                        
+
                                         {% if product.tipo_venta == 'intercambio' or product.tipo_venta == 'ambos' %}
                                             <a href="{% url 'product_detail' product.id %}" 
                                                 class="btn btn-info w-100 text-white">
-                                                <i class="fas fa-exchange-alt"></i> Ver para Intercambio
+                                                <i class="fas fa-exchange-alt"></i> Ver para intercambio
                                             </a>
                                         {% endif %}
+
                                     {% else %}
                                         <button class="btn btn-secondary w-100" disabled>
-                                            <i class="fas fa-times-circle"></i> Sin Stock
+                                            <i class="fas fa-times-circle"></i> Sin stock
                                         </button>
                                     {% endif %}
+
                                 {% endif %}
                             </div>
+
                         </div>
                     </div>
                 </div>
+
                 {% empty %}
                 <div class="col-12">
                     <div class="alert alert-info text-center py-5">
@@ -316,20 +347,22 @@
             {% if products.has_other_pages %}
             <nav aria-label="Navegación de productos">
                 <ul class="pagination justify-content-center">
+
                     {% if products.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% for subcat_id in selected_subcategory_ids %}&subcategory={{ subcat_id }}{% endfor %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if brand %}&brand={{ brand }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if tipo_venta %}&tipo_venta={{ tipo_venta }}{% endif %}">
+                            <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                                 <i class="fas fa-angle-double-left"></i>
                             </a>
                         </li>
+                        
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ products.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% for subcat_id in selected_subcategory_ids %}&subcategory={{ subcat_id }}{% endfor %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if brand %}&brand={{ brand }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if tipo_venta %}&tipo_venta={{ tipo_venta }}{% endif %}">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                                 <i class="fas fa-angle-left"></i>
                             </a>
                         </li>
                     {% endif %}
 
-                    <li class="page-item active">
+                    <li class="page-item">
                         <span class="page-link">
                             Página {{ products.number }} de {{ products.paginator.num_pages }}
                         </span>
@@ -337,45 +370,46 @@
 
                     {% if products.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ products.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% for subcat_id in selected_subcategory_ids %}&subcategory={{ subcat_id }}{% endfor %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if brand %}&brand={{ brand }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if tipo_venta %}&tipo_venta={{ tipo_venta }}{% endif %}">
+                            <a class="page-link" href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                                 <i class="fas fa-angle-right"></i>
                             </a>
                         </li>
+
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ products.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% for subcat_id in selected_subcategory_ids %}&subcategory={{ subcat_id }}{% endfor %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if brand %}&brand={{ brand }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if tipo_venta %}&tipo_venta={{ tipo_venta }}{% endif %}">
+                            <a class="page-link" href="?page={{ products.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                                 <i class="fas fa-angle-double-right"></i>
                             </a>
                         </li>
                     {% endif %}
+
                 </ul>
             </nav>
             {% endif %}
         </div>
+
+    </div>
     </div>
 </div>
 
+
 <style>
-/* Productos */
 .product-card {
     transition: all 0.3s ease;
     border: 1px solid #e0e0e0;
     border-radius: 12px;
     overflow: hidden;
 }
-
 .product-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 24px rgba(74, 144, 226, 0.15) !important;
 }
-
 .product-img {
     height: 220px;
     width: 100%;
     object-fit: scale-down;
     background: white;
-     padding: 5px;
+    padding: 5px;
 }
-
 .product-img-placeholder {
     height: 220px;
     display: flex;
@@ -385,178 +419,118 @@
     background: linear-gradient(135deg, #f5f0e8 0%, #e8e4dc 100%);
     color: #999;
 }
-
 .product-img-placeholder i {
     font-size: 3rem;
     opacity: 0.3;
 }
-
 .product-title {
     font-weight: 600;
     min-height: 2.5rem;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
 }
-
 .product-description {
     min-height: 3rem;
-    line-height: 1.4;
 }
-
 .product-meta {
     font-size: 0.85rem;
 }
-
-/* Botón Favorito */
 .btn-favorito {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
     border: none;
-    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     cursor: pointer;
-    transition: all 0.3s;
-    z-index: 5;
+    transition: all 0.3s ease;
 }
-
 .btn-favorito:hover {
     transform: scale(1.15);
-    background: white;
 }
 
-.btn-favorito i {
-    font-size: 1.2rem;
-    color: #dc3545;
-}
-
-/* Filtros */
-.filters-sidebar .card {
-    border-radius: 12px;
-}
-
-.filters-sidebar .card-header {
-    background: linear-gradient(135deg, #4A90E2, #2C5AA0);
-    border-radius: 12px 12px 0 0;
-}
-
-/* Badges */
-.badge {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 4px 8px;
-}
-
-/* Precios en oferta */
-.precio-oferta .text-decoration-line-through {
-    font-size: 1rem;
-}
-
-.precio-oferta h4 {
-    font-size: 1.5rem;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-/* Paginación */
+/* PAGINACIÓN */
 .pagination .page-link {
     color: #4A90E2;
     border-radius: 8px;
     margin: 0 4px;
 }
-
 .pagination .page-item.active .page-link {
     background: linear-gradient(135deg, #4A90E2, #2C5AA0);
-    border-color: #4A90E2;
 }
 
-/* Responsive */
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .filters-sidebar {
         margin-bottom: 2rem;
     }
-    
-    .product-card {
-        margin-bottom: 1.5rem;
-    }
 }
 </style>
 
+
 <script>
-
 document.addEventListener("DOMContentLoaded", function() {
-  const categorySelect = document.getElementById("category_select");
-  const subcategoryContainer = document.getElementById("subcategory_checkboxes");
+    const categorySelect = document.getElementById("category_select");
+    const subcategoryContainer = document.getElementById("subcategory_container");
 
-  categorySelect.addEventListener("change", function() {
-    const categoryId = this.value;
+    categorySelect.addEventListener("change", function() {
+        const categoryId = this.value;
 
-    if (!categoryId) {
-      subcategoryContainer.innerHTML = '<div class="alert alert-light small mb-0 p-2">Primero selecciona una categoría.</div>';
-      return;
-    }
-
-    // Llamada AJAX a tu endpoint
-    fetch(`{% url 'ajax_load_subcategories' %}?category_id=${categoryId}`)
-
-      .then(response => response.json())
-      .then(data => {
-        subcategoryContainer.innerHTML = ""; // limpiar
-
-        if (data.length === 0) {
-          subcategoryContainer.innerHTML = '<div class="alert alert-light small mb-0 p-2">No hay subcategorías para esta categoría.</div>';
-        } else {
-          data.forEach(subcat => {
-            const div = document.createElement("div");
-            div.classList.add("form-check", "ms-3");
-            div.innerHTML = `
-              <input class="form-check-input" type="checkbox" 
-                     name="subcategory" id="subcat_${subcat.id}" value="${subcat.id}">
-              <label class="form-check-label" for="subcat_${subcat.id}">
-                ${subcat.name}
-              </label>
-            `;
-            subcategoryContainer.appendChild(div);
-          });
+        if (!categoryId) {
+            subcategoryContainer.innerHTML = '<div class="alert alert-light small p-2">Primero selecciona una categoría.</div>';
+            return;
         }
-      })
-      .catch(error => {
-        console.error("Error cargando subcategorías:", error);
-        subcategoryContainer.innerHTML = '<div class="alert alert-danger">Error al cargar subcategorías.</div>';
-      });
-  });
+
+        fetch(`{% url 'ajax_load_subcategories' %}?category_id=${categoryId}`)
+        .then(response => response.json())
+        .then(data => {
+            subcategoryContainer.innerHTML = "";
+
+            if (data.length === 0) {
+                subcategoryContainer.innerHTML = '<div class="alert alert-light small p-2">No hay subcategorías para esta categoría.</div>';
+            } else {
+                data.forEach(subcat => {
+                    subcategoryContainer.innerHTML += `
+                        <div class="form-check ms-3">
+                            <input class="form-check-input" type="checkbox" 
+                                   name="subcategory" id="subcat_${subcat.id}" value="${subcat.id}">
+                            <label class="form-check-label" for="subcat_${subcat.id}">
+                                ${subcat.name}
+                            </label>
+                        </div>
+                    `;
+                });
+            }
+        })
+        .catch(() => {
+            subcategoryContainer.innerHTML = '<div class="alert alert-danger small p-2">Error al cargar subcategorías.</div>';
+        });
+    });
 });
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar contador del sidebar con el valor del navbar
+
     const contadorNavbar = document.querySelector('.contador-favoritos');
     const contadorSidebar = document.getElementById('contadorFavoritosSidebar');
     if (contadorNavbar && contadorSidebar) {
         contadorSidebar.textContent = contadorNavbar.textContent || '0';
     }
-    
-    // FAVORITOS
+
     let procesandoFav = false;
-    
+
     document.querySelectorAll('.btn-favorito').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (procesandoFav) return;
             procesandoFav = true;
-            
+
             const productoId = this.dataset.productoId;
             const icon = this.querySelector('i');
-            
+
             this.disabled = true;
-            
+
             fetch(`/favoritos/toggle/${productoId}/`, {
                 method: 'POST',
                 headers: {
@@ -564,24 +538,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRFToken': getCookie('csrftoken')
                 }
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     icon.classList.toggle('far');
                     icon.classList.toggle('fas');
-                    
-                    const contadorFav = document.querySelector('.contador-favoritos');
-                    if (contadorFav) {
-                        const nuevo = parseInt(contadorFav.textContent || 0) + (data.es_favorito ? 1 : -1);
-                        contadorFav.textContent = nuevo;
-                        contadorFav.style.display = nuevo === 0 ? 'none' : 'inline';
+
+                    if (contadorNavbar) {
+                        const nuevo = parseInt(contadorNavbar.textContent || 0) + (data.es_favorito ? 1 : -1);
+                        contadorNavbar.textContent = nuevo;
+                        contadorNavbar.style.display = nuevo === 0 ? 'none' : 'inline';
                     }
-                    
-                    // Actualizar contador del sidebar
-                    const contadorSidebar = document.getElementById('contadorFavoritosSidebar');
+
                     if (contadorSidebar) {
-                        const nuevoSidebar = parseInt(contadorSidebar.textContent || 0) + (data.es_favorito ? 1 : -1);
-                        contadorSidebar.textContent = nuevoSidebar;
+                        contadorSidebar.textContent =
+                            parseInt(contadorSidebar.textContent || 0) + (data.es_favorito ? 1 : -1);
                     }
                 }
             })
@@ -592,53 +563,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // AGREGAR AL CARRITO
     document.querySelectorAll('.btn-agregar-carrito-lista').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const productoId = this.dataset.productoId;
             const originalText = this.innerHTML;
-            
+
             this.disabled = true;
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
-            
+
             fetch("{% url 'cart_add' 0 %}".replace('0', productoId), {
                 method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    this.innerHTML = '<i class="fas fa-check"></i> Agregado ✔';
                     const contador = document.querySelector('.contador-carrito');
                     if (contador) {
                         contador.textContent = data.cart_count;
                         contador.style.display = 'inline';
                     }
-                    
-                    this.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
-                    this.classList.replace('btn-primary', 'btn-success');
-                    
-                    setTimeout(() => {
-                        this.innerHTML = originalText;
-                        this.classList.replace('btn-success', 'btn-primary');
-                        this.disabled = false;
-                    }, 1500);
+                } else {
+                    this.innerHTML = '<i class="fas fa-times"></i> Error';
                 }
-            })
-            .catch(() => {
-                this.innerHTML = '<i class="fas fa-times"></i> Error.';
-                this.classList.add('btn-danger');
+
                 setTimeout(() => {
                     this.innerHTML = originalText;
-                    this.classList.remove('btn-danger');
                     this.disabled = false;
-                }, 2000);
+                }, 1200);
+            })
+            .catch(() => {
+                this.innerHTML = 'Error';
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 1200);
             });
         });
     });
+
 });
+
 
 function getCookie(name) {
     let cookieValue = null;
@@ -655,4 +626,5 @@ function getCookie(name) {
     return cookieValue;
 }
 </script>
+
 {% endblock %}

@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'product_list' %}">Productos</a></li>
@@ -26,7 +25,6 @@
     </nav>
 
     <div class="row">
-        <!-- Imagen del producto -->
         <div class="col-md-6">
             <div class="card shadow-sm">
                 {% if product.image %}
@@ -42,7 +40,6 @@
             </div>
         </div>
 
-        <!-- Información del producto -->
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -65,15 +62,14 @@
                         {% endif %}
                     </p>
 
-                    <!-- Tipo de transacción -->
                     <div class="mb-3">
                         {% if product.tipo_venta == 'venta' %}
                             <span class="badge bg-success fs-6">
-                                <i class="fas fa-dollar-sign"></i> Solo Venta
+                                <i class="fas fa-dollar-sign"></i> Solo venta
                             </span>
                         {% elif product.tipo_venta == 'intercambio' %}
                             <span class="badge bg-info fs-6">
-                                <i class="fas fa-exchange-alt"></i> Solo Intercambio
+                                <i class="fas fa-exchange-alt"></i> Solo intercambio
                             </span>
                         {% elif product.tipo_venta == 'ambos' %}
                             <span class="badge bg-success fs-6 me-1">
@@ -85,10 +81,8 @@
                         {% endif %}
                     </div>
 
-                    <!-- Precio (solo si acepta venta) -->
                     {% if product.acepta_venta %}
                         {% if product.en_oferta and product.porcentaje_descuento > 0 %}
-                            <!-- Precio con descuento -->
                             <div class="mb-4">
                                 <div class="d-flex align-items-center gap-3 mb-2">
                                     <span class="badge bg-danger fs-5 px-3 py-2">
@@ -104,7 +98,6 @@
                                 </small>
                             </div>
                         {% else %}
-                            <!-- Precio normal -->
                             <h2 class="text-primary mb-4">${{ product.price }}</h2>
                         {% endif %}
                     {% else %}
@@ -140,17 +133,13 @@
                         {% endif %}
                     </div>
 
-                    <!-- Botones de acción -->
                     <div class="d-grid gap-2 mb-3">
                         {% if user.is_authenticated and product.owner == user.profile %}
-                            <!-- Si es el dueño del producto -->
                             <div class="alert alert-warning">
                                 <i class="fas fa-info-circle"></i> Este es tu producto. No puedes comprarlo ni agregarlo a favoritos.
                             </div>
                         {% else %}
-                            <!-- Si NO es el dueño -->
                             {% if product.stock > 0 and product.on_stock %}
-                                <!-- Botón comprar (solo si acepta venta) -->
                                 {% if product.acepta_venta %}
                                     <button class="btn-agregar-carrito btn btn-primary btn-lg" 
                                             data-producto-id="{{ product.id }}">
@@ -158,14 +147,13 @@
                                     </button>
                                 {% endif %}
                                 
-                                <!-- Botón intercambio -->
                                 {% if product.acepta_intercambio %}
                                     <button class="btn btn-info btn-lg text-white" data-bs-toggle="modal" data-bs-target="#modalIntercambio">
                                         <i class="fas fa-exchange-alt"></i> 
                                         {% if product.tipo_venta == 'intercambio' %}
-                                            Contactar para Intercambio
+                                            Contactar para intercambio
                                         {% else %}
-                                            Proponer Intercambio
+                                            Proponer intercambio
                                         {% endif %}
                                     </button>
                                 {% endif %}
@@ -175,7 +163,6 @@
                                 </button>
                             {% endif %}
                             
-                            <!-- Botón favoritos -->
                             {% if request.user.is_authenticated %}
                                 {% load favoritos_tags %}
                                 {% es_favorito request.user product as is_fav %}
@@ -193,20 +180,19 @@
                             {% endif %}
                         {% endif %}
 
-                        <!-- Panel de administración (siempre visible para el dueño) -->
                         {% if user.is_authenticated and product.owner == user.profile %}
                             <div class="card mt-4 bg-light border-warning">
                                 <div class="card-body">
                                     <h6 class="card-title text-warning">
-                                        <i class="fas fa-tools"></i> Panel de Administración
+                                        <i class="fas fa-tools"></i> Panel de administración
                                     </h6>
                                     <p class="card-text small mb-3">Este es tu producto. Puedes editarlo o eliminarlo.</p>
                                     <div class="d-grid gap-2">
                                         <a href="{% url 'product_edit' product.id %}" class="btn btn-warning">
-                                            <i class="fas fa-edit"></i> Editar Producto
+                                            <i class="fas fa-edit"></i> Editar producto
                                         </a>
                                         <a href="{% url 'product_delete' product.id %}" class="btn btn-outline-danger">
-                                            <i class="fas fa-trash"></i> Eliminar Producto
+                                            <i class="fas fa-trash"></i> Eliminar producto
                                         </a>
                                     </div>
                                 </div>
@@ -214,7 +200,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Información del vendedor -->
                     {% if product.owner %}
                     <div class="card mt-4 bg-light">
                         <div class="card-body">
@@ -250,7 +235,6 @@
         </div>
     </div>
 
-    <!-- Productos relacionados -->
     {% if related_products %}
     <div class="mt-5">
         <h3 class="mb-4">Productos relacionados</h3>
@@ -291,13 +275,12 @@
     {% endif %}
 </div>
 
-<!-- Modal de Intercambio -->
 <div class="modal fade" id="modalIntercambio" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-exchange-alt"></i> Información de Contacto para Intercambio
+                    <i class="fas fa-exchange-alt"></i> Información de contacto para intercambio
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -342,7 +325,7 @@
             </div>
             <div class="modal-footer">
                 <a href="{% url 'profile_view_user' product.owner.user.username %}" class="btn btn-primary">
-                    <i class="fas fa-user"></i> Ver Perfil Completo
+                    <i class="fas fa-user"></i> Ver perfil completo
                 </a>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>

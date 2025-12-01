@@ -2,9 +2,8 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2>Editar Categoría: {{ category.name }}</h2>
+  <h2>Editar categoría: {{ category.name }}</h2>
 
-  <!-- Cambiar nombre de la categoría (opcional) -->
   <form method="post" class="mb-3">
     {% csrf_token %}
     <div class="row g-2 align-items-center">
@@ -20,7 +19,6 @@
     </div>
   </form>
 
-  <!-- Subcategorías actuales con botón Eliminar -->
   <div class="mb-3">
     <h5>Subcategorías actuales:</h5>
     {% if current_subs %}
@@ -42,7 +40,6 @@
     {% endif %}
   </div>
 
-  <!-- Línea para escribir y botón agregar subcategoría -->
   <div class="mb-3">
     <h5>Agregar subcategoría</h5>
     <form method="post" class="row g-2">

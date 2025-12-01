@@ -5,7 +5,6 @@
 {% block title %}Inicio - Blue Shopping{% endblock %}
 
 {% block content %}
-<!-- Carrusel de Banners -->
 <div id="mainCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
     <div class="carousel-indicators">
         <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="0" class="active"></button>
@@ -26,7 +25,7 @@
                                 Tu marketplace de confianza. Comprá, vendé e intercambiá productos de forma segura.
                             </p>
                             <a href="{% url 'product_list' %}" class="btn btn-light btn-lg">
-                                <i class="fas fa-shopping-bag"></i> Explorar Productos
+                                <i class="fas fa-shopping-bag"></i> Explorar productos
                             </a>
                         </div>
                         <div class="col-md-6 text-center d-none d-md-block">
@@ -49,7 +48,7 @@
                                 ¡Explora los mejores descuentos en el sitio!
                             </p>
                             <a href="{% url 'product_list' %}?tipo_venta=venta" class="btn btn-warning btn-lg">
-                                <i class="fas fa-fire"></i> Ver Ofertas
+                                <i class="fas fa-fire"></i> Ver ofertas
                             </a>
                         </div>
                         <div class="col-md-6 text-center d-none d-md-block">
@@ -66,13 +65,13 @@
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
                             <h1 class="display-4 fw-bold text-white mb-4">
-                                🔄 Sistema de Intercambio
+                                🔄 Sistema de intercambio
                             </h1>
                             <p class="lead text-white mb-4">
                                 Intercambiá productos con otros usuarios. Una forma sustentable de renovar tus cosas.
                             </p>
                             <a href="{% url 'product_list' %}?tipo_venta=intercambio" class="btn btn-info btn-lg">
-                                <i class="fas fa-exchange-alt"></i> Explorar Intercambios
+                                <i class="fas fa-exchange-alt"></i> Explorar intercambios
                             </a>
                         </div>
                         <div class="col-md-6 text-center d-none d-md-block">
@@ -190,7 +189,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h2 class="fw-bold">
-                        <i class="fas fa-tag text-warning"></i> Ofertas Destacadas
+                        <i class="fas fa-tag text-warning"></i> Ofertas destacadas
                     </h2>
                     <p class="text-muted mb-0">Aprovechá estos descuentos increíbles</p>
                 </div>
@@ -249,7 +248,7 @@
                         {% if producto.stock > 0 %}
                             <button class="btn-agregar-carrito btn btn-danger btn-sm w-100 mt-2" 
                                     data-producto-id="{{ producto.id }}">
-                                <i class="fas fa-cart-plus"></i> Aprovechar Oferta
+                                <i class="fas fa-cart-plus"></i> Aprovechar oferta
                             </button>
                         {% else %}
                             <button class="btn btn-secondary btn-sm w-100 mt-2" disabled>Sin stock</button>
@@ -266,7 +265,7 @@
     <section class="mb-5">
         <div class="section-header mb-4">
             <h2 class="fw-bold">
-                <i class="fas fa-th-large text-primary"></i> Explorá por Categorías
+                <i class="fas fa-th-large text-primary"></i> Explorá por categorías
             </h2>
             <p class="text-muted mb-0">Encontrá lo que buscás más rápido</p>
         </div>

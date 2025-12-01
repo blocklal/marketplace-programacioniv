@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Mis Órdenes{% endblock %}
+{% block title %}Mis órdenes{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="mb-4">Mis Órdenes</h1>
+    <h1 class="mb-4">Mis órdenes</h1>
 
     {% if orders %}
         <div class="row">
@@ -47,13 +47,15 @@
                             </div>
 
                             <div class="col-md-3 text-end">
+                                <a href="{% url 'download_receipt_pdf' order.id %}" class="btn btn-sm btn-success me-1">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </a>
                                 <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-primary">
-                                    Ver Detalle
+                                    Ver detalle
                                 </a>
                             </div>
                         </div>
 
-                        <!-- Productos de la orden con botones de review -->
                         {% if order.status == 'delivered' %}
                         <div class="border-top pt-3">
                             <h6 class="mb-3"><i class="fas fa-box"></i> Productos de esta orden:</h6>
@@ -82,7 +84,7 @@
                                         </div>
                                     {% else %}
                                         <a href="{% url 'crear_review' item.seller.username %}" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-star"></i> Dejar Review
+                                            <i class="fas fa-star"></i> Dejar review
                                         </a>
                                     {% endif %}
                                 </div>

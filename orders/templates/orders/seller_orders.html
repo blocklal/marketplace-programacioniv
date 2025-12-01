@@ -1,23 +1,22 @@
 {% extends 'base.html' %}
 
-{% block title %}Mis Ventas{% endblock %}
+{% block title %}Mis ventas{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-store"></i> Panel de Ventas</h1>
+        <h1><i class="fas fa-store"></i> Panel de ventas</h1>
         <a href="{% url 'profile_view' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> Volver al Perfil
+            <i class="fas fa-arrow-left"></i> Volver al perfil
         </a>
     </div>
 
-    <!-- Estadísticas rápidas -->
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h3 class="text-primary">{{ total_orders|default:0 }}</h3>
-                    <p class="mb-0">Órdenes Totales</p>
+                    <p class="mb-0">Órdenes totales</p>
                 </div>
             </div>
         </div>
@@ -33,7 +32,7 @@
             <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h3 class="text-info">{{ processing_count|default:0 }}</h3>
-                    <p class="mb-0">En Proceso</p>
+                    <p class="mb-0">En proceso</p>
                 </div>
             </div>
         </div>
@@ -50,7 +49,7 @@
     {% if orders %}
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title mb-4">Órdenes con tus Productos</h5>
+                <h5 class="card-title mb-4">Órdenes con tus productos</h5>
                 
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -89,9 +88,12 @@
                                     {% endif %}
                                 </td>
                                 <td>
+                                    <a href="{% url 'download_receipt_pdf' order_data.order.id %}" class="btn btn-sm btn-success me-1">
+                                        <i class="fas fa-file-pdf"></i> PDF
+                                    </a>
                                     <a href="{% url 'seller_order_detail' order_data.order.id %}" 
-                                       class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i> Ver Detalle
+                                    class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> Ver detalle
                                     </a>
                                 </td>
                             </tr>

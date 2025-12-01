@@ -18,7 +18,7 @@ class Product(models.Model):
     subcategories = models.ManyToManyField('SubCategory', blank=True, related_name='products')
     description = models.TextField(blank=True)
     stock = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, default=0)
     brand = models.CharField(blank=True, max_length=50, default="Genérico")
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     on_stock = models.BooleanField(default=True)

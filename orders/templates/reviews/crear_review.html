@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {% if review_existente %}Editar Review{% else %}Dejar Review{% endif %} - {{ receptor.username }}
+    {% if review_existente %}Editar review{% else %}Dejar review{% endif %} - {{ receptor.username }}
 {% endblock %}
 
 {% block content %}
@@ -13,14 +13,13 @@
                     <h3 class="mb-0">
                         <i class="fas fa-star"></i>
                         {% if review_existente %}
-                            Editar Review para {{ receptor.username }}
+                            Editar review para {{ receptor.username }}
                         {% else %}
-                            Dejar Review para {{ receptor.username }}
+                            Dejar review para {{ receptor.username }}
                         {% endif %}
                     </h3>
                 </div>
                 <div class="card-body">
-                    <!-- Información de transacción -->
                     <div class="alert alert-info mb-4">
                         <h6 class="mb-2"><i class="fas fa-info-circle"></i> Relación comercial:</h6>
                         <ul class="mb-0">
@@ -36,7 +35,6 @@
                     <form method="post">
                         {% csrf_token %}
                         
-                        <!-- Calificación con estrellas -->
                         <div class="mb-4">
                             <label class="form-label"><strong>Calificación *</strong></label>
                             <div class="rating-stars">
@@ -65,7 +63,6 @@
                             </small>
                         </div>
 
-                        <!-- Comentario -->
                         <div class="mb-4">
                             <label for="comentario" class="form-label"><strong>Comentario *</strong></label>
                             <textarea 
@@ -83,11 +80,10 @@
                             </div>
                         </div>
 
-                        <!-- Botones -->
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-warning">
                                 <i class="fas fa-paper-plane"></i>
-                                {% if review_existente %}Actualizar Review{% else %}Enviar Review{% endif %}
+                                {% if review_existente %}Actualizar review{% else %}Enviar review{% endif %}
                             </button>
                             <a href="{% url 'profile_view_user' receptor.username %}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancelar
@@ -97,7 +93,6 @@
                 </div>
             </div>
 
-            <!-- Perfil del usuario -->
             <div class="card shadow mt-4">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Sobre {{ receptor.username }}</h5>
@@ -181,7 +176,6 @@
 </style>
 
 <script>
-// Contador de caracteres
 document.addEventListener('DOMContentLoaded', function() {
     const textarea = document.getElementById('comentario');
     const charCount = document.getElementById('charCount');
@@ -200,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     textarea.addEventListener('input', updateCount);
-    updateCount(); // Inicializar
+    updateCount();
 });
 </script>
 {% endblock %}

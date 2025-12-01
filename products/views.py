@@ -11,7 +11,6 @@ def product_list(request):
     categories = Category.objects.all()
     subcategories = []
 
-    # Filtros
     search_query = request.GET.get('search', '')
     selected_category_id = request.GET.get('category', '')
     selected_subcategory_ids = request.GET.getlist('subcategory') 
@@ -20,8 +19,8 @@ def product_list(request):
     max_price = request.GET.get('max_price', '')
     tipo_venta = request.GET.get('tipo_venta', '')
     solo_ofertas = request.GET.get('solo_ofertas', '')
+    show_unavailable = request.GET.get('mostrar_agotados', 'false')
 
-    
     if search_query:
         products = products.filter(name__icontains=search_query)
 
@@ -53,26 +52,29 @@ def product_list(request):
 
     if solo_ofertas == 'true':
         products = products.filter(en_oferta=True, porcentaje_descuento__gt=0)
-    
-    # Paginación
-    paginator = Paginator(products, 24)
+
+    if show_unavailable != 'true':
+        products = products.filter(stock__gt=0)
+
+    paginator = Paginator(products, 9) #Cantidad de productos por página
     page_number = request.GET.get('page')
     products = paginator.get_page(page_number)
-    
+
     context = {
         'products': products,
         'categories': categories,
         'subcategories': subcategories,
         'search_query': search_query,
-        'selected_category': selected_category_id, 
+        'selected_category': selected_category_id,
         'selected_subcategory_ids': selected_subcategory_ids,
         'brand': brand,
         'min_price': min_price,
         'max_price': max_price,
         'tipo_venta': tipo_venta,
         'solo_ofertas': solo_ofertas,
+        'mostrar_agotados': show_unavailable,
     }
-    
+
     return render(request, 'products/product_list.html', context)
 
 @login_required
@@ -96,8 +98,10 @@ def product_add(request):
         if not porcentaje_descuento:
             porcentaje_descuento = 0
         
-        category = Category.objects.get(id=category_id)
+        if not price or price.strip() == '' or tipo_venta == 'intercambio':
+            price = 0
         
+        category = Category.objects.get(id=category_id)
         product = Product.objects.create(
             name=name,
             category=category,
@@ -119,7 +123,6 @@ def product_add(request):
         messages.success(request, f'Producto "{name}" creado exitosamente')
         return redirect('product_list')
     
-    # Método GET
     categories = Category.objects.all()
     return render(request, 'products/product_form.html', {'categories': categories})
 
@@ -148,6 +151,9 @@ def product_edit(request, product_id):
         
         porcentaje_descuento_str = request.POST.get('porcentaje_descuento')
         porcentaje_descuento = int(porcentaje_descuento_str) if porcentaje_descuento_str else 0
+        
+        if not price or price.strip() == '' or tipo_venta == 'intercambio':
+            price = 0
         
         product.name = name
         product.category = Category.objects.get(id=category_id)
@@ -191,7 +197,6 @@ def product_delete(request, product_id):
     """Eliminar un producto"""
     product = get_object_or_404(Product, id=product_id)
     
-    # Verificar que el usuario sea el dueño
     if product.owner != request.user.profile:
         messages.error(request, 'No tienes permiso para eliminar este producto')
         return redirect('product_detail', product_id=product_id)
@@ -202,7 +207,6 @@ def product_delete(request, product_id):
         messages.success(request, f'Producto "{product_name}" eliminado exitosamente')
         return redirect('my_products')
     
-    # Si no es POST, mostrar confirmación
     context = {
         'product': product
     }
@@ -247,7 +251,6 @@ def category_add(request):
             description=description
         )
 
-        # Crear cada subcategoría asociada
         for subcat_name in subcategories:
             if subcat_name.strip():
                 SubCategory.objects.create(
@@ -277,7 +280,6 @@ def category_edit(request, category_id):
     if request.method == 'POST':
         action = request.POST.get('action')
 
-        # Actualizar nombre de la categoría (si viene)
         new_name = request.POST.get('name')
         if new_name is not None:
             category.name = new_name.strip() or category.name

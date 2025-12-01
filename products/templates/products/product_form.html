@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Agregar Producto{% endblock %}
+{% block title %}Agregar producto{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <h1 class="my-4">Agregar Nuevo Producto</h1>
+            <h1 class="my-4">Agregar nuevo producto</h1>
             
             <form method="post" enctype="multipart/form-data" id="formProducto">
                 {% csrf_token %}
@@ -17,7 +17,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="category" class="form-label">Categoría</label>
+                    <label for="category" class="form-label">Categoría   (Si requerís una categoría nueva, contáctanos.)</label>
                     <select class="form-control" id="category" name="category" required>
                         <option value="">Selecciona una categoría</option>
                         {% for category in categories %}
@@ -50,7 +50,7 @@
                                 <input class="form-check-input" type="radio" name="tipo_venta" 
                                         id="tipo_venta" value="venta" checked>
                                 <label class="form-check-label" for="tipo_venta">
-                                    <strong><i class="fas fa-dollar-sign text-success"></i> Solo Venta</strong>
+                                    <strong><i class="fas fa-dollar-sign text-success"></i> Solo venta</strong>
                                     <small class="d-block text-muted">El producto solo estará disponible para compra</small>
                                 </label>
                             </div>
@@ -58,7 +58,7 @@
                                 <input class="form-check-input" type="radio" name="tipo_venta" 
                                         id="tipo_intercambio" value="intercambio">
                                 <label class="form-check-label" for="tipo_intercambio">
-                                    <strong><i class="fas fa-exchange-alt text-info"></i> Solo Intercambio</strong>
+                                    <strong><i class="fas fa-exchange-alt text-info"></i> Solo intercambio</strong>
                                     <small class="d-block text-muted">El producto solo estará disponible para intercambio (no se mostrará el precio)</small>
                                 </label>
                             </div>
@@ -66,7 +66,7 @@
                                 <input class="form-check-input" type="radio" name="tipo_venta" 
                                         id="tipo_ambos" value="ambos">
                                 <label class="form-check-label" for="tipo_ambos">
-                                    <strong><i class="fas fa-arrows-alt-h text-primary"></i> Venta o Intercambio</strong>
+                                    <strong><i class="fas fa-arrows-alt-h text-primary"></i> Venta o intercambio</strong>
                                     <small class="d-block text-muted">El producto estará disponible para ambas opciones</small>
                                 </label>
                             </div>
@@ -88,13 +88,13 @@
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="en_oferta" name="en_oferta">
                         <label class="form-check-label" for="en_oferta">
-                            <strong><i class="fas fa-tag text-danger"></i> Producto en Oferta</strong>
+                            <strong><i class="fas fa-tag text-danger"></i> Producto en oferta</strong>
                         </label>
                     </div>
                 </div>
 
                 <div class="mb-3" id="descuento-container" style="display: none;">
-                    <label for="porcentaje_descuento" class="form-label">Porcentaje de Descuento</label>
+                    <label for="porcentaje_descuento" class="form-label">Porcentaje de descuento</label>
                     <div class="input-group">
                         <input type="number" class="form-control" id="porcentaje_descuento" 
                             name="porcentaje_descuento" value="0" min="0" max="100">
@@ -134,7 +134,7 @@
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(135deg, #ffc107, #ff9800);">
                 <h5 class="modal-title text-white">
-                    <i class="fas fa-exclamation-triangle"></i> Advertencia sobre Intercambios
+                    <i class="fas fa-exclamation-triangle"></i> Advertencia sobre intercambios
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -203,7 +203,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const descuentoContainer = document.getElementById('descuento-container');
     let modalShown = false;
 
-    // --- Manejo del campo precio según tipo de venta ---
     radios.forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.value === 'intercambio') {
@@ -217,7 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- Manejo de Ofertas ---
     checkOferta.addEventListener('change', function() {
         if (this.checked) {
             descuentoContainer.style.display = 'block';
@@ -227,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // --- Validar antes de enviar (Modal de Intercambio) ---
     form.addEventListener('submit', function(e) {
         const tipoSeleccionado = document.querySelector('input[name="tipo_venta"]:checked').value;
         

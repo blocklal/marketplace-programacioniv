@@ -19,7 +19,7 @@
                         {% csrf_token %}
 
                         <div class="mb-3">
-                            <label for="name" class="form-label">Nombre del Producto</label>
+                            <label for="name" class="form-label">Nombre del producto</label>
                             <input type="text" class="form-control" id="name" name="name" 
                                    value="{{ product.name }}" required maxlength="50">
                         </div>
@@ -58,7 +58,6 @@
                                       rows="4">{{ product.description }}</textarea>
                         </div>
 
-                        <!-- TIPO DE VENTA -->
                         <div class="mb-4">
                             <label class="form-label d-block">
                                 <strong>Tipo de transacción</strong>
@@ -70,7 +69,7 @@
                                                id="tipo_venta_edit" value="venta"
                                                {% if product.tipo_venta == 'venta' %}checked{% endif %}>
                                         <label class="form-check-label" for="tipo_venta_edit">
-                                            <strong><i class="fas fa-dollar-sign text-success"></i> Solo Venta</strong>
+                                            <strong><i class="fas fa-dollar-sign text-success"></i> Solo venta</strong>
                                             <small class="d-block text-muted">El producto solo estará disponible para compra</small>
                                         </label>
                                     </div>
@@ -79,7 +78,7 @@
                                                id="tipo_intercambio_edit" value="intercambio"
                                                {% if product.tipo_venta == 'intercambio' %}checked{% endif %}>
                                         <label class="form-check-label" for="tipo_intercambio_edit">
-                                            <strong><i class="fas fa-exchange-alt text-info"></i> Solo Intercambio</strong>
+                                            <strong><i class="fas fa-exchange-alt text-info"></i> Solo intercambio</strong>
                                             <small class="d-block text-muted">El producto solo estará disponible para intercambio</small>
                                         </label>
                                     </div>
@@ -88,7 +87,7 @@
                                                id="tipo_ambos_edit" value="ambos"
                                                {% if product.tipo_venta == 'ambos' %}checked{% endif %}>
                                         <label class="form-check-label" for="tipo_ambos_edit">
-                                            <strong><i class="fas fa-arrows-alt-h text-primary"></i> Venta o Intercambio</strong>
+                                            <strong><i class="fas fa-arrows-alt-h text-primary"></i> Venta o intercambio</strong>
                                             <small class="d-block text-muted">El producto estará disponible para ambas opciones</small>
                                         </label>
                                     </div>
@@ -111,13 +110,13 @@
                                     <input class="form-check-input" type="checkbox" id="en_oferta" name="en_oferta"
                                         {% if product.en_oferta %}checked{% endif %}>
                                     <label class="form-check-label" for="en_oferta">
-                                    <strong><i class="fas fa-tag text-danger"></i> Producto en Oferta</strong>
+                                    <strong><i class="fas fa-tag text-danger"></i> Producto en oferta</strong>
                                     </label>
                                 </div>
                             </div>
 
                             <div class="mb-3" id="descuento-container" style="display: none;">
-                                <label for="porcentaje_descuento" class="form-label">Porcentaje de Descuento</label>
+                                <label for="porcentaje_descuento" class="form-label">Porcentaje de descuento</label>
                                 <div class="input-group">
                                     <input type="number" class="form-control" id="porcentaje_descuento" 
                                         name="porcentaje_descuento" value="{{ product.porcentaje_descuento }}" min="0" max="100">
@@ -140,7 +139,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="image" class="form-label">Imagen del Producto</label>
+                            <label for="image" class="form-label">Imagen del producto</label>
                             {% if product.image %}
                                 <div class="mb-2">
                                     <img src="{{ product.image.url }}" alt="{{ product.name }}" 
@@ -162,13 +161,13 @@
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Guardar Cambios
+                                <i class="fas fa-save"></i> Guardar cambios
                             </button>
                             <a href="{% url 'product_detail' product.id %}" class="btn btn-secondary">
                                 Cancelar
                             </a>
                             <a href="{% url 'product_delete' product.id %}" class="btn btn-danger ms-auto">
-                                <i class="fas fa-trash"></i> Eliminar Producto
+                                <i class="fas fa-trash"></i> Eliminar producto
                             </a>
                         </div>
                     </form>
@@ -187,13 +186,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
   if (!categorySelect || !subcategoryContainer) return;
 
-  // Lee el product_id desde un data-attribute (sin template tags)
   const PRODUCT_ID = root ? root.getAttribute("data-product-id") : null;
 
-  // Set con IDs de subcategorías ya seleccionadas
   const initiallySelected = new Set();
 
-  // Renderiza checkboxes
   function renderSubcategories(list) {
     subcategoryContainer.innerHTML = "";
     if (!Array.isArray(list) || list.length === 0) {
@@ -217,7 +213,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Carga subcategorías según categoría
   function loadSubcategories(categoryId) {
     if (!categoryId) {
       subcategoryContainer.innerHTML = '<div class="alert alert-light small mb-0 p-2">Primero selecciona una categoría.</div>';
@@ -238,9 +233,8 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   }
 
-  // Carga IDs seleccionados del producto (opcional)
   function loadInitiallySelected(productId) {
-    if (!productId) return Promise.resolve(); // sin preselección
+    if (!productId) return Promise.resolve();
     const url = `/ajax/product-selected-subcategories/?product_id=${encodeURIComponent(productId)}`;
     return fetch(url)
       .then(res => {
@@ -248,7 +242,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return res.json();
       })
       .then(ids => {
-        // Asegurar strings en el Set
         (ids || []).forEach(id => initiallySelected.add(String(id)));
       })
       .catch(err => {
@@ -256,13 +249,11 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   }
 
-  // Al cambiar de categoría, recargar subcategorías (sin mantener selección previa)
   categorySelect.addEventListener("change", function() {
     initiallySelected.clear();
     loadSubcategories(this.value);
   });
 
-  // Inicialización: cargar preselección y luego subcategorías según la categoría actual
   loadInitiallySelected(PRODUCT_ID).finally(() => {
     if (categorySelect.value) {
       loadSubcategories(categorySelect.value);
@@ -305,18 +296,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     
     
-    // Inicializar al cargar
     actualizarPrecio();
     
-    // Validar antes de enviar el formulario
     form.addEventListener('submit', function(e) {
         const tipoSeleccionado = document.querySelector('input[name="tipo_venta"]:checked').value;
         
-        // Si incluye intercambio, mostrar advertencia
         if (tipoSeleccionado === 'intercambio' || tipoSeleccionado === 'ambos') {
             e.preventDefault();
             
-            // Crear modal de advertencia
             const modalHtml = `
                 <div class="modal fade" id="modalAdvertenciaIntercambio" tabindex="-1">
                     <div class="modal-dialog modal-dialog-centered">
@@ -343,19 +330,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             
-            // Agregar modal al DOM si no existe
             if (!document.getElementById('modalAdvertenciaIntercambio')) {
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
             }
             
-            // Mostrar modal
             const modal = new bootstrap.Modal(document.getElementById('modalAdvertenciaIntercambio'));
             modal.show();
             
-            // Cuando acepte, enviar el formulario
             document.getElementById('btnAceptarAdvertenciaEdit').addEventListener('click', function() {
                 modal.hide();
-                // Remover el listener para evitar loop infinito
                 const newForm = form.cloneNode(true);
                 form.parentNode.replaceChild(newForm, form);
                 newForm.submit();

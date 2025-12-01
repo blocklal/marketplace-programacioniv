@@ -1,16 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mis Reviews{% endblock %}
+{% block title %}Mis reviews{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h2 class="mb-4">
-        <i class="fas fa-star text-warning"></i> Gestión de Reviews
+        <i class="fas fa-star text-warning"></i> Gestión de reviews
     </h2>
 
     {% if usuarios %}
-        <!-- Tabs -->
         <ul class="nav nav-tabs mb-4" id="reviewsTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="pendientes-tab" data-bs-toggle="tab" data-bs-target="#pendientes" type="button" role="tab">
@@ -26,7 +25,6 @@
         </ul>
 
         <div class="tab-content" id="reviewsTabContent">
-            <!-- REVIEWS PENDIENTES -->
             <div class="tab-pane fade show active" id="pendientes" role="tabpanel">
                 {% with pendientes=usuarios|dictsort:"mi_review" %}
                 {% if pendientes %}
@@ -63,10 +61,10 @@
                                     </div>
 
                                     <a href="{% url 'crear_review' usuario.username %}" class="btn btn-warning w-100 mb-2">
-                                        <i class="fas fa-star"></i> Dejar Review
+                                        <i class="fas fa-star"></i> Dejar review
                                     </a>
                                     <a href="{% url 'profile_view_user' usuario.username %}" class="btn btn-outline-secondary w-100">
-                                        <i class="fas fa-user"></i> Ver Perfil
+                                        <i class="fas fa-user"></i> Ver perfil
                                     </a>
                                 </div>
                             </div>
@@ -84,7 +82,6 @@
                 {% endwith %}
             </div>
 
-            <!-- REVIEWS COMPLETADAS -->
             <div class="tab-pane fade" id="completadas" role="tabpanel">
                 {% with completadas=usuarios|dictsort:"mi_review" %}
                 <div class="row">
@@ -128,10 +125,10 @@
                                 {% endif %}
 
                                 <a href="{% url 'crear_review' usuario.username %}" class="btn btn-outline-warning w-100 mb-2">
-                                    <i class="fas fa-edit"></i> Editar Review
+                                    <i class="fas fa-edit"></i> Editar review
                                 </a>
                                 <a href="{% url 'profile_view_user' usuario.username %}" class="btn btn-outline-secondary w-100">
-                                    <i class="fas fa-user"></i> Ver Perfil
+                                    <i class="fas fa-user"></i> Ver perfil
                                 </a>
                             </div>
                         </div>
@@ -156,7 +153,7 @@
             <h3 class="mt-4">No hay transacciones aún</h3>
             <p class="text-muted">Las reviews pendientes aparecerán cuando completes una compra o venta.</p>
             <a href="{% url 'product_list' %}" class="btn btn-primary mt-3">
-                <i class="fas fa-shopping-cart"></i> Ver Productos
+                <i class="fas fa-shopping-cart"></i> Ver productos
             </a>
         </div>
     {% endif %}
@@ -190,9 +187,7 @@
 </style>
 
 <script>
-// Contar pendientes y completadas
 document.addEventListener('DOMContentLoaded', function() {
-    // Contar cards en pendientes
     const pendientesTab = document.getElementById('pendientes');
     if (pendientesTab) {
         const pendientesCards = pendientesTab.querySelectorAll('.card').length;

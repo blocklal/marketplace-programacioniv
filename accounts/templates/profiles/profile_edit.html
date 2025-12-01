@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Editar Perfil{% endblock %}
+{% load socialaccount %}
 
 {% block content %}
 <div class="container mt-5">
@@ -26,6 +27,14 @@
                                     <span class="text-white fs-2">{{ request.user.username|first|upper }}</span>
                                 </div>
                             {% endif %}
+                            
+                            <!-- Username con botón editar -->
+                            <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+                                <h5 class="mb-0">{{ request.user.username }}</h5>
+                                <a href="{% url 'change_username' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                            </div>
                         </div>
 
                         <!-- Información personal -->
@@ -48,6 +57,44 @@
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" name="email" 
                                    value="{{ request.user.email }}">
+                        </div>
+
+                        <!-- Botón cambiar contraseña -->
+                        <div class="mb-4">
+                            <a href="{% url 'change_password' %}" class="btn btn-outline-warning">
+                                <i class="fas fa-key"></i> Cambiar Contraseña
+                            </a>
+                        </div>
+
+                        <!-- Cuentas enlazadas -->
+                        <h5 class="mb-3">Cuentas enlazadas (Requiere del mismo email)</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-2">
+                                {% if google_connected %}
+                                    <button type="button" class="btn btn-success w-100" disabled>
+                                        <i class="fab fa-google"></i> Google Conectado
+                                    </button>
+                                    <small class="text-muted d-block mt-1">{{ google_email }}</small>
+                                {% else %}
+                                    <a href="{% provider_login_url 'google' next='/cuentas/perfil/editar/' %}" 
+                                       class="btn btn-outline-danger w-100">
+                                        <i class="fab fa-google"></i> Conectar con Google
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                {% if facebook_connected %}
+                                    <button type="button" class="btn btn-primary w-100" disabled>
+                                        <i class="fab fa-facebook"></i> Facebook Conectado
+                                    </button>
+                                    <small class="text-muted d-block mt-1">{{ facebook_email }}</small>
+                                {% else %}
+                                    <a href="{% provider_login_url 'facebook' next='/cuentas/perfil/editar/' %}" 
+                                       class="btn btn-outline-primary w-100">
+                                        <i class="fab fa-facebook"></i> Conectar con Facebook
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -73,11 +120,14 @@
                                    value="{{ profile.phone }}" maxlength="20">
                         </div>
 
-
                         <!-- Botones -->
                         <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                            <a href="{% url 'profile_view' %}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                            <a href="{% url 'profile_view' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
                         </div>
                     </form>
                 </div>

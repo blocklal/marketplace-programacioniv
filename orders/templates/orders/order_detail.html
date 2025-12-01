@@ -11,20 +11,18 @@
             <a href="{% url 'cancel_order' order.id %}" 
                class="btn btn-outline-danger"
                onclick="return confirm('¿Estás seguro de cancelar esta orden?')">
-                Cancelar Orden
+                Cancelar orden
             </a>
         {% endif %}
     </div>
 
     <div class="row">
-        <!-- Información de la orden -->
         <div class="col-md-8">
-            <!-- Estado y pago -->
             <div class="card mb-3 shadow-sm">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6>Estado de la Orden</h6>
+                            <h6>Estado de la orden</h6>
                             {% if order.status == 'pending' %}
                                 <span class="badge bg-warning fs-6">Pendiente</span>
                             {% elif order.status == 'processing' %}
@@ -38,7 +36,7 @@
                             {% endif %}
                         </div>
                         <div class="col-md-6">
-                            <h6>Estado del Pago</h6>
+                            <h6>Estado del pago</h6>
                             {% if order.paid %}
                                 <span class="badge bg-success fs-6">Pagado</span>
                                 <br>
@@ -51,7 +49,6 @@
                 </div>
             </div>
 
-            <!-- Productos -->
             <div class="card mb-3 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-4">Productos</h5>
@@ -84,10 +81,9 @@
                 </div>
             </div>
 
-            <!-- Información de envío -->
             <div class="card mb-3 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Información de Envío</h5>
+                    <h5 class="card-title mb-3">Información de envío</h5>
                     <p class="mb-1"><strong>Dirección:</strong> {{ order.shipping_address }}</p>
                     <p class="mb-1"><strong>Ciudad:</strong> {{ order.shipping_city }}</p>
                     <p class="mb-1"><strong>País:</strong> {{ order.shipping_country }}</p>
@@ -96,7 +92,6 @@
             </div>
         </div>
 
-        <!-- Resumen -->
         <div class="col-md-4">
             <div class="card shadow-sm sticky-top" style="top: 20px;">
                 <div class="card-body">
