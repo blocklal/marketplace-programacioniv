@@ -1,95 +1,187 @@
 {% extends 'base.html' %}
+
+{% block title %}Crear Cuenta - Blue Shopping{% endblock %}
+
 {% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <!-- Icono gatuno -->
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cat text-primary" style="font-size: 4rem;"></i>
+                    </div>
 
-<div class="d-flex justify-content-center mt-5">
-    <div class="card shadow p-4 text-center" 
-         style="width: 480px; border-radius: 15px;">
+                    <!-- Título -->
+                    <h3 class="text-center mb-3">Crear Cuenta</h3>
+                    <p class="text-center text-muted mb-4">Unite a nuestra comunidad Blue Shopping 🐱💙</p>
 
-        <h3 class="mb-4">Crear Cuenta</h3>
-
-        <!-- Mostrar errores generales del formulario -->
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-            {% for error in form.non_field_errors %}
-                {{ error }}
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <form action="{% url 'signup' %}" method="post">
-            {% csrf_token %}
-
-            <!-- Usuario -->
-            <div class="mb-3 text-start">
-                <label class="form-label">Usuario</label>
-                {{ form.username }}
-                {% if form.username.errors %}
-                    <div class="text-danger small mt-1">
-                        {% for error in form.username.errors %}
+                    <!-- Errores generales -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
                             <i class="fas fa-exclamation-circle"></i> {{ error }}
                         {% endfor %}
                     </div>
-                {% endif %}
-            </div>
+                    {% endif %}
 
-            <!-- Correo -->
-            <div class="mb-3 text-start">
-                <label class="form-label">Correo Electrónico</label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                    <div class="text-danger small mt-1">
-                        {% for error in form.email.errors %}
-                            <i class="fas fa-exclamation-circle"></i> {{ error }}
-                        {% endfor %}
+                    <!-- Formulario -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Usuario -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-user"></i> Usuario
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.username.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Tu nombre de usuario será visible públicamente
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-envelope"></i> Correo Electrónico
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.email.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contraseña -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-lock"></i> Contraseña
+                            </label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.password1.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <small class="text-muted">
+                                    <i class="fas fa-shield-alt"></i> Mínimo 8 caracteres, combina letras y números
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Confirmar Contraseña -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-lock"></i> Confirmar Contraseña
+                            </label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.password2.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Términos -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label small" for="terms">
+                                Acepto los <a href="#" class="text-primary">términos y condiciones</a> 
+                                y la <a href="#" class="text-primary">política de privacidad</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus"></i> Crear Cuenta
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Link a login -->
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            ¿Ya tienes cuenta? 
+                            <a href="{% url 'signin' %}" class="text-primary fw-bold">Inicia sesión aquí</a>
+                        </small>
                     </div>
-                {% endif %}
+                </div>
             </div>
 
-            <!-- Contraseña -->
-            <div class="mb-3 text-start">
-                <label class="form-label">Contraseña</label>
-                {{ form.password1 }}
-                {% if form.password1.errors %}
-                    <div class="text-danger small mt-1">
-                        {% for error in form.password1.errors %}
-                            <i class="fas fa-exclamation-circle"></i> {{ error }}
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle"></i> Mínimo 8 caracteres
-                    </small>
-                {% endif %}
+            <!-- Footer info -->
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-check-circle text-success"></i> Registro 100% gratuito
+                </small>
             </div>
-
-            <!-- Confirmar Contraseña -->
-            <div class="mb-3 text-start">
-                <label class="form-label">Confirmar Contraseña</label>
-                {{ form.password2 }}
-                {% if form.password2.errors %}
-                    <div class="text-danger small mt-1">
-                        {% for error in form.password2.errors %}
-                            <i class="fas fa-exclamation-circle"></i> {{ error }}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <button type="submit" class="btn btn-violeta w-100 mt-2">
-                Registrarse
-            </button>
-        </form>
-
-        <div class="mt-3">
-            <small>¿Ya tienes cuenta? <a href="{% url 'signin' %}">Inicia sesión aquí</a></small>
         </div>
     </div>
 </div>
 
 <style>
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.btn-lg {
+    padding: 12px 20px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4A90E2, #2C5AA0);
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2C5AA0, #1a3a70);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.form-control {
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
 .text-danger {
     font-size: 0.875rem;
 }
-</style>
 
+.form-check-input:checked {
+    background-color: #4A90E2;
+    border-color: #4A90E2;
+}
+
+.alert-danger {
+    background-color: #fff3f3;
+    border-color: #ffcdd2;
+    color: #d32f2f;
+}
+</style>
 {% endblock %}

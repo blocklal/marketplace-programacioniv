@@ -1,34 +1,140 @@
 {% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión - Blue Shopping{% endblock %}
+
 {% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <!-- Icono gatuno -->
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cat text-primary" style="font-size: 4rem;"></i>
+                    </div>
 
-<div class="d-flex justify-content-center mt-5">
-    <div class="card shadow p-4 text-center" 
-         style="width: 420px; border-radius: 15px;">
+                    <!-- Título -->
+                    <h3 class="text-center mb-3">Iniciar Sesión</h3>
+                    <p class="text-center text-muted mb-4">Bienvenido de vuelta a Blue Shopping</p>
 
-        <h3 class="mb-4">Iniciar sesión</h3>
+                    <!-- Errores -->
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                    </div>
+                    {% endif %}
 
-        {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
+                    <!-- Formulario -->
+                    <form method="post">
+                        {% csrf_token %}
 
-        <form action="/cuentas/signin/" method="post">
-            {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-user"></i> Usuario
+                            </label>
+                            {{ form.username }}
+                        </div>
 
-            <div class="mb-3 text-start">
-                <label class="form-label">Usuario</label>
-                {{ form.username }}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-lock"></i> Contraseña
+                            </label>
+                            {{ form.password }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Separador -->
+                    <div class="divider my-4">
+                        <span>o continuar con</span>
+                    </div>
+
+                    <!-- Login con Google -->
+                    {% load socialaccount %}
+                    <a href="{% provider_login_url 'google' process='login' %}" 
+                       class="btn btn-outline-danger w-100">
+                        <i class="fab fa-google"></i> Google
+                    </a>
+                    <a href="{% provider_login_url 'facebook' process='login' %}" 
+                       class="btn btn-outline-danger w-100">
+                        <i class="fab fa-google"></i> Facebook
+                    </a>
+
+                    <!-- Link a registro -->
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            ¿No tienes cuenta? 
+                            <a href="{% url 'signup' %}" class="text-primary fw-bold">Regístrate aquí</a>
+                        </small>
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3 text-start">
-                <label class="form-label">Contraseña</label>
-                {{ form.password }}
+            <!-- Footer info -->
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt"></i> Tus datos están protegidos
+                </small>
             </div>
-
-            <button class="btn btn-violeta w-100 mt-2" type="submit">
-                Iniciar sesión
-            </button>
-        </form>
+        </div>
     </div>
 </div>
 
+<style>
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.btn-lg {
+    padding: 12px 20px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4A90E2, #2C5AA0);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2C5AA0, #1a3a70);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.form-control {
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+}
+
+.form-control:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.divider span {
+    padding: 0 10px;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+</style>
 {% endblock %}
