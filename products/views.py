@@ -1,47 +1,80 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Product, Category
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.admin.views.decorators import staff_member_required
+from .models import Product, Category, SubCategory
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.http import JsonResponse
 
 # Create your views here.
 
 def product_list(request):
-    products = Product.objects.filter(on_stock=True)
-    
+    products = Product.objects.all().order_by('-creation_time')
+    categories = Category.objects.all()
+    subcategories = []
+
+    # Filtros
     search_query = request.GET.get('search', '')
+    selected_category_id = request.GET.get('category', '')
+    selected_subcategory_ids = request.GET.getlist('subcategory') 
+    brand = request.GET.get('brand', '')
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
+    tipo_venta = request.GET.get('tipo_venta', '')
+    solo_ofertas = request.GET.get('solo_ofertas', '')
+
+    
     if search_query:
         products = products.filter(name__icontains=search_query)
-    
-    category_id = request.GET.get('category', '')
-    if category_id:
-        products = products.filter(category_id=category_id)
-    
-    min_price = request.GET.get('min_price', '')
-    if min_price:
-        products = products.filter(price__gte=min_price)
-    
-    max_price = request.GET.get('max_price', '')
-    if max_price:
-        products = products.filter(price__lte=max_price)
-    
 
-    brand = request.GET.get('brand', '')
+    if selected_category_id:
+        try:
+            selected_category = Category.objects.get(id=selected_category_id)
+            subcategories = SubCategory.objects.filter(category=selected_category).order_by('name')
+        except Category.DoesNotExist:
+            selected_category_id = ''
+        
+        if not selected_subcategory_ids:
+            products = products.filter(category_id=selected_category_id)
+
+    if selected_subcategory_ids:
+        products = products.filter(subcategories__id__in=selected_subcategory_ids).distinct()
+
+
     if brand:
         products = products.filter(brand__icontains=brand)
+
+    if min_price:
+        products = products.filter(price__gte=min_price)
+
+    if max_price:
+        products = products.filter(price__lte=max_price)
+
+    if tipo_venta:
+        products = products.filter(tipo_venta=tipo_venta)
+
+    if solo_ofertas == 'true':
+        products = products.filter(en_oferta=True, porcentaje_descuento__gt=0)
     
-    products = products.order_by('-creation_time')
-    
-    categories = Category.objects.all()
+    # Paginación
+    paginator = Paginator(products, 24)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
     
     context = {
         'products': products,
         'categories': categories,
+        'subcategories': subcategories,
         'search_query': search_query,
-        'selected_category': category_id,
+        'selected_category': selected_category_id, 
+        'selected_subcategory_ids': selected_subcategory_ids,
+        'brand': brand,
         'min_price': min_price,
         'max_price': max_price,
-        'brand': brand,
+        'tipo_venta': tipo_venta,
+        'solo_ofertas': solo_ofertas,
     }
+    
     return render(request, 'products/product_list.html', context)
 
 @login_required
@@ -49,14 +82,24 @@ def product_add(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         category_id = request.POST.get('category')
+        
+        subcategory_ids = request.POST.getlist('subcategories') 
+        
         description = request.POST.get('description')
         price = request.POST.get('price')
         stock = request.POST.get('stock')
         brand = request.POST.get('brand')
         image = request.FILES.get('image')
-        tipo_venta = request.POST.get('tipo_venta', 'venta')  # NUEVO
+        tipo_venta = request.POST.get('tipo_venta', 'venta')
+        
+        en_oferta = request.POST.get('en_oferta') == 'on'
+        
+        porcentaje_descuento = request.POST.get('porcentaje_descuento')
+        if not porcentaje_descuento:
+            porcentaje_descuento = 0
         
         category = Category.objects.get(id=category_id)
+        
         product = Product.objects.create(
             name=name,
             category=category,
@@ -66,40 +109,47 @@ def product_add(request):
             brand=brand,
             image=image,
             owner=request.user.profile,
-            tipo_venta=tipo_venta  # NUEVO
+            tipo_venta=tipo_venta,
+            en_oferta=en_oferta,
+            porcentaje_descuento=porcentaje_descuento
         )
+        
+        if subcategory_ids:
+            subs = SubCategory.objects.filter(id__in=subcategory_ids)
+            product.subcategories.set(subs)
         
         return redirect('product_list')
     
+    # Método GET
     categories = Category.objects.all()
-    context = {
-        'categories': categories
-    }
-    return render(request, 'products/product_form.html', context)
+    return render(request, 'products/product_form.html', {'categories': categories})
 
 
 @login_required
 def product_edit(request, product_id):
-    """Editar un producto"""
     product = get_object_or_404(Product, id=product_id)
     
-    # Verificar que el usuario sea el dueño
     if product.owner != request.user.profile:
         messages.error(request, 'No tienes permiso para editar este producto')
         return redirect('product_detail', product_id=product_id)
     
     if request.method == 'POST':
-        # Obtener datos del formulario
         name = request.POST.get('name')
         category_id = request.POST.get('category')
+        subcategory_ids = request.POST.getlist('subcategories')
+        
         description = request.POST.get('description')
         price = request.POST.get('price')
         stock = request.POST.get('stock')
         brand = request.POST.get('brand')
         on_stock = request.POST.get('on_stock') == 'on'
-        tipo_venta = request.POST.get('tipo_venta', 'venta')  # NUEVO
+        tipo_venta = request.POST.get('tipo_venta', 'venta')
         
-        # Actualizar producto
+        en_oferta = request.POST.get('en_oferta') == 'on'
+        
+        porcentaje_descuento_str = request.POST.get('porcentaje_descuento')
+        porcentaje_descuento = int(porcentaje_descuento_str) if porcentaje_descuento_str else 0
+        
         product.name = name
         product.category = Category.objects.get(id=category_id)
         product.description = description
@@ -107,24 +157,34 @@ def product_edit(request, product_id):
         product.stock = stock
         product.brand = brand
         product.on_stock = on_stock
-        product.tipo_venta = tipo_venta  # NUEVO
+        product.tipo_venta = tipo_venta
+        product.en_oferta = en_oferta
+        product.porcentaje_descuento = porcentaje_descuento
         
-        # Actualizar imagen si se subió una nueva
         if request.FILES.get('image'):
             product.image = request.FILES['image']
         
         product.save()
         
+        if subcategory_ids:
+            subs = SubCategory.objects.filter(id__in=subcategory_ids)
+            product.subcategories.set(subs) 
+        else:
+            product.subcategories.clear() 
+            
         messages.success(request, 'Producto actualizado exitosamente')
         return redirect('product_detail', product_id=product.id)
-    
-    # GET request - mostrar formulario
     categories = Category.objects.all()
-    context = {
+    if product.category:
+        available_subcategories = SubCategory.objects.filter(category=product.category).order_by('name')
+    else:
+        available_subcategories = SubCategory.objects.none()
+        
+    return render(request, 'products/product_edit.html', {
         'product': product,
-        'categories': categories
-    }
-    return render(request, 'products/product_edit.html', context)
+        'categories': categories,
+        'subcategories': available_subcategories
+    })
 
 @login_required
 def product_delete(request, product_id):
@@ -140,38 +200,13 @@ def product_delete(request, product_id):
         product_name = product.name
         product.delete()
         messages.success(request, f'Producto "{product_name}" eliminado exitosamente')
-        return redirect('profile_view')
+        return redirect('my_products')
     
     # Si no es POST, mostrar confirmación
     context = {
         'product': product
     }
     return render(request, 'products/product_delete_confirm.html', context)
-
-@login_required
-def my_products(request):
-    """Listar mis productos"""
-    products = Product.objects.filter(owner=request.user.profile).order_by('-creation_time')
-    
-    context = {
-        'products': products
-    }
-    return render(request, 'products/my_products.html', context)
-
-
-def category_add(request):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        description = request.POST.get('description')
-        
-        Category.objects.create(
-            name=name,
-            description=description
-        )
-        
-        return redirect('product_add')
-    
-    return render(request, 'products/category_form.html')
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -186,3 +221,96 @@ def product_detail(request, product_id):
         'related_products': related_products
     }
     return render(request, 'products/product_detail.html', context)
+
+@login_required
+def my_products(request):
+    """Listar mis productos"""
+    products = Product.objects.filter(owner=request.user.profile).order_by('-creation_time')
+    
+    context = {
+        'products': products
+    }
+    return render(request, 'products/my_products.html', context)
+
+def category_add(request):
+    if not request.user.is_staff:
+        return redirect('product_list')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        subcategories = request.POST.getlist('subcategories')  # lista de strings
+
+        category = Category.objects.create(
+            name=name,
+            description=description
+        )
+
+        # Crear cada subcategoría asociada
+        for subcat_name in subcategories:
+            if subcat_name.strip():  # evitar vacíos
+                SubCategory.objects.create(
+                    name=subcat_name.strip(),
+                    category=category
+                )
+
+        return redirect('category_list')
+    
+    return render(request, 'categories/category_form.html')
+
+
+def category_list(request):
+    if not request.user.is_staff:
+        return redirect('product_list')
+    categories = Category.objects.prefetch_related('subcategories').order_by('name')
+    return render(request, 'categories/category_list.html', {'categories': categories})
+
+def category_edit(request, category_id):
+    if not request.user.is_staff:
+        return redirect('product_list')
+    category = get_object_or_404(Category, id=category_id)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        # Actualizar nombre de la categoría (si viene)
+        new_name = request.POST.get('name')
+        if new_name is not None:
+            category.name = new_name.strip() or category.name
+            category.save()
+
+        if action == 'delete_sub':
+            sub_id = request.POST.get('sub_id')
+            # Solo borra si la subcategoria pertenece a esta categoría
+            SubCategory.objects.filter(id=sub_id, category=category).delete()
+            messages.success(request, 'Subcategoría eliminada.')
+            return redirect('category_edit', category_id=category.id)
+
+        elif action == 'add_sub':
+            sub_name = request.POST.get('new_sub_name', '').strip()
+            if sub_name:
+                # Evitar duplicados dentro de la misma categoría
+                exists = SubCategory.objects.filter(category=category, name__iexact=sub_name).exists()
+                if exists:
+                    messages.error(request, 'Ya existe una subcategoría con ese nombre en esta categoría.')
+                else:
+                    SubCategory.objects.create(category=category, name=sub_name)
+                    messages.success(request, 'Subcategoría agregada.')
+            else:
+                messages.error(request, 'Ingresá un nombre para la subcategoría.')
+            return redirect('category_edit', category_id=category.id)
+
+        # Cualquier otro POST redirige
+        return redirect('category_edit', category_id=category.id)
+
+    current_subs = SubCategory.objects.filter(category=category).order_by('name')
+
+    return render(request, 'categories/category_edit.html', {
+        'category': category,
+        'current_subs': current_subs,
+    })
+
+def load_subcategories(request):
+    category_id = request.GET.get('category_id')
+    subcategories = SubCategory.objects.filter(category_id=category_id).order_by('name')
+    return JsonResponse(list(subcategories.values('id', 'name')), safe=False)

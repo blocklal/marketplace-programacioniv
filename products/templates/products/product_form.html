@@ -25,13 +25,21 @@
                         {% endfor %}
                     </select>
                 </div>
-
+                
+                <div class="mb-3">
+                    <label class="form-label">Subcategorías (Opcional)</label>
+                    <div id="subcategory_checkboxes">
+                        <div class="alert alert-light small mb-0 p-2">
+                        Primero selecciona una categoría.
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="mb-3">
                     <label for="description" class="form-label">Descripción</label>
                     <textarea class="form-control" id="description" name="description" rows="4"></textarea>
                 </div>
 
-                <!-- TIPO DE VENTA -->
                 <div class="mb-4">
                     <label class="form-label d-block">
                         <strong>Tipo de transacción</strong>
@@ -40,7 +48,7 @@
                         <div class="card-body">
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="radio" name="tipo_venta" 
-                                       id="tipo_venta" value="venta" checked>
+                                        id="tipo_venta" value="venta" checked>
                                 <label class="form-check-label" for="tipo_venta">
                                     <strong><i class="fas fa-dollar-sign text-success"></i> Solo Venta</strong>
                                     <small class="d-block text-muted">El producto solo estará disponible para compra</small>
@@ -48,7 +56,7 @@
                             </div>
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="radio" name="tipo_venta" 
-                                       id="tipo_intercambio" value="intercambio">
+                                        id="tipo_intercambio" value="intercambio">
                                 <label class="form-check-label" for="tipo_intercambio">
                                     <strong><i class="fas fa-exchange-alt text-info"></i> Solo Intercambio</strong>
                                     <small class="d-block text-muted">El producto solo estará disponible para intercambio (no se mostrará el precio)</small>
@@ -56,7 +64,7 @@
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="tipo_venta" 
-                                       id="tipo_ambos" value="ambos">
+                                        id="tipo_ambos" value="ambos">
                                 <label class="form-check-label" for="tipo_ambos">
                                     <strong><i class="fas fa-arrows-alt-h text-primary"></i> Venta o Intercambio</strong>
                                     <small class="d-block text-muted">El producto estará disponible para ambas opciones</small>
@@ -74,6 +82,25 @@
                             step="0.01" value="0">
                     </div>
                     <small class="text-muted">Precio sugerido para venta o referencia</small>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="en_oferta" name="en_oferta">
+                        <label class="form-check-label" for="en_oferta">
+                            <strong><i class="fas fa-tag text-danger"></i> Producto en Oferta</strong>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3" id="descuento-container" style="display: none;">
+                    <label for="porcentaje_descuento" class="form-label">Porcentaje de Descuento</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="porcentaje_descuento" 
+                            name="porcentaje_descuento" value="0" min="0" max="100">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <small class="text-muted">Descuento del 0% al 100%</small>
                 </div>
 
                 <div class="mb-3">
@@ -102,7 +129,6 @@
     </div>
 </div>
 
-<!-- Modal de advertencia -->
 <div class="modal fade" id="modalAdvertenciaIntercambio" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -128,46 +154,94 @@
 </div>
 
 <script>
+
+document.getElementById('category').addEventListener('change', function() {
+  const categoryId = this.value;
+  const container = document.getElementById('subcategory_checkboxes');
+
+  if (!categoryId) {
+    container.innerHTML = '<div class="alert alert-light small mb-0 p-2">Primero selecciona una categoría.</div>';
+    return;
+  }
+
+  // Usamos tu endpoint existente
+  fetch(`{% url 'ajax_load_subcategories' %}?category_id=${categoryId}`)
+
+    .then(response => response.json())
+    .then(data => {
+      container.innerHTML = ""; // limpiar
+
+      if (data.length === 0) {
+        container.innerHTML = '<div class="alert alert-light small mb-0 p-2">No hay subcategorías para esta categoría.</div>';
+      } else {
+        data.forEach(subcat => {
+          container.innerHTML += `
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" 
+                     name="subcategories" id="subcat_${subcat.id}" value="${subcat.id}">
+              <label class="form-check-label" for="subcat_${subcat.id}">
+                ${subcat.name}
+              </label>
+            </div>
+          `;
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Error cargando subcategorías:", error);
+      container.innerHTML = '<div class="alert alert-danger">Error al cargar subcategorías.</div>';
+    });
+});
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const radios = document.querySelectorAll('input[name="tipo_venta"]');
     const precioContainer = document.getElementById('precio-container');
     const precioInput = document.getElementById('price');
     const form = document.getElementById('formProducto');
+    const checkOferta = document.getElementById('en_oferta');
+    const descuentoContainer = document.getElementById('descuento-container');
     let modalShown = false;
-    
-    // Manejo del campo precio según tipo de venta
+
+    // --- Manejo del campo precio según tipo de venta ---
     radios.forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.value === 'intercambio') {
                 precioContainer.style.opacity = '0.5';
-                precioInput.readOnly = true;  // ← Cambiar aquí
+                precioInput.readOnly = true;
                 precioInput.value = '0';
             } else {
                 precioContainer.style.opacity = '1';
-                precioInput.readOnly = false;  // ← Y aquí
+                precioInput.readOnly = false;
             }
         });
     });
+
+    // --- Manejo de Ofertas ---
+    checkOferta.addEventListener('change', function() {
+        if (this.checked) {
+            descuentoContainer.style.display = 'block';
+        } else {
+            descuentoContainer.style.display = 'none';
+            document.getElementById('porcentaje_descuento').value = '0';
+        }
+    });
     
-    // Validar antes de enviar
+    // --- Validar antes de enviar (Modal de Intercambio) ---
     form.addEventListener('submit', function(e) {
         const tipoSeleccionado = document.querySelector('input[name="tipo_venta"]:checked').value;
         
-        // Si incluye intercambio y no se mostró el modal
         if ((tipoSeleccionado === 'intercambio' || tipoSeleccionado === 'ambos') && !modalShown) {
             e.preventDefault();
             e.stopPropagation();
             
-            // Mostrar modal
             const modalElement = document.getElementById('modalAdvertenciaIntercambio');
             const modal = new bootstrap.Modal(modalElement);
             modal.show();
             
-            // Cuando acepte
             document.getElementById('btnAceptarAdvertencia').onclick = function() {
                 modalShown = true;
                 modal.hide();
-                // Esperar a que se cierre el modal
                 modalElement.addEventListener('hidden.bs.modal', function() {
                     form.submit();
                 }, { once: true });

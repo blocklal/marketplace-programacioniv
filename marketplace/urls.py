@@ -26,6 +26,9 @@ urlpatterns = [
     path('carrito/', include('cart.urls')),
     path('favoritos/', include('wishlist.urls')),
     path('pedidos/', include('orders.urls')),
+
+    #192999686888-28591unipkq50e4afh6hegso91gf21dc.apps.googleusercontent.com
+    #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
     
 ]
 

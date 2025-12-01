@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Editar Categoría: {{ category.name }}</h2>
+
+  <!-- Cambiar nombre de la categoría (opcional) -->
+  <form method="post" class="mb-3">
+    {% csrf_token %}
+    <div class="row g-2 align-items-center">
+      <div class="col-auto">
+        <label for="name" class="col-form-label">Nombre:</label>
+      </div>
+      <div class="col-auto">
+        <input type="text" name="name" id="name" class="form-control" value="{{ category.name }}">
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-secondary">Actualizar nombre</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Subcategorías actuales con botón Eliminar -->
+  <div class="mb-3">
+    <h5>Subcategorías actuales:</h5>
+    {% if current_subs %}
+      <ul class="list-group">
+        {% for sub in current_subs %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ sub.name }}</span>
+            <form method="post" style="margin:0;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete_sub">
+              <input type="hidden" name="sub_id" value="{{ sub.id }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">No hay subcategorías en esta categoría.</p>
+    {% endif %}
+  </div>
+
+  <!-- Línea para escribir y botón agregar subcategoría -->
+  <div class="mb-3">
+    <h5>Agregar subcategoría</h5>
+    <form method="post" class="row g-2">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add_sub">
+      <div class="col-md-6">
+        <input type="text" name="new_sub_name" class="form-control" placeholder="Nombre de la nueva subcategoría">
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Agregar subcategoría</button>
+      </div>
+      <div class="col-12 mt-2">
+        <a href="{% url 'category_list' %}" class="btn btn-link">Volver a categorías</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

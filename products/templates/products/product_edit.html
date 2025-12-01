@@ -35,15 +35,30 @@
 
                         <div class="mb-3">
                             <label for="category" class="form-label">Categoría</label>
-                            <select class="form-control" id="category" name="category" required>
+                            <select class="form-select" id="category_select" name="category" required>
                                 <option value="">Selecciona una categoría</option>
-                                {% for category in categories %}
-                                    <option value="{{ category.id }}" 
-                                            {% if product.category.id == category.id %}selected{% endif %}>
-                                        {{ category.name }}
-                                    </option>
+                                {% for c in categories %}
+                                <option value="{{ c.id }}" {% if product.category and product.category.id == c.id %}selected{% endif %}>
+                                    {{ c.name }}
+                                </option>
                                 {% endfor %}
                             </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Subcategorías</label>
+                            <div>
+                                {% for subcat in subcategories %}
+                                <div class="form-check ms-3">
+                                    <input class="form-check-input" type="checkbox"
+                                        name="subcategories" id="subcat_{{ subcat.id }}" value="{{ subcat.id }}"
+                                        {% if subcat in product.subcategories.all %}checked{% endif %}>
+                                    <label class="form-check-label" for="subcat_{{ subcat.id }}">
+                                    {{ subcat.name }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -100,6 +115,26 @@
                                 </div>
                             </div>
 
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="en_oferta" name="en_oferta"
+                                        {% if product.en_oferta %}checked{% endif %}>
+                                    <label class="form-check-label" for="en_oferta">
+                                    <strong><i class="fas fa-tag text-danger"></i> Producto en Oferta</strong>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="descuento-container" style="display: none;">
+                                <label for="porcentaje_descuento" class="form-label">Porcentaje de Descuento</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="porcentaje_descuento" 
+                                        name="porcentaje_descuento" value="{{ product.porcentaje_descuento }}" min="0" max="100">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <small class="text-muted">Descuento del 0% al 100%</small>
+                            </div>
+
                             <div class="col-md-6 mb-3">
                                 <label for="stock" class="form-label">Stock</label>
                                 <input type="number" class="form-control" id="stock" name="stock" 
@@ -153,12 +188,113 @@
 </div>
 
 <script>
+
+document.addEventListener("DOMContentLoaded", function() {
+  const root = document.getElementById("product-edit-root");
+  const categorySelect = document.getElementById("category_select");
+  const subcategoryContainer = document.getElementById("subcategory_container");
+
+  if (!categorySelect || !subcategoryContainer) return;
+
+  // Lee el product_id desde un data-attribute (sin template tags)
+  const PRODUCT_ID = root ? root.getAttribute("data-product-id") : null;
+
+  // Set con IDs de subcategorías ya seleccionadas
+  const initiallySelected = new Set();
+
+  // Renderiza checkboxes
+  function renderSubcategories(list) {
+    subcategoryContainer.innerHTML = "";
+    if (!Array.isArray(list) || list.length === 0) {
+      subcategoryContainer.innerHTML = '<div class="alert alert-light small mb-0 p-2">No hay subcategorías para esta categoría.</div>';
+      return;
+    }
+
+    list.forEach(subcat => {
+      const idStr = String(subcat.id);
+      const isChecked = initiallySelected.has(idStr);
+      const div = document.createElement("div");
+      div.classList.add("form-check", "ms-3");
+      div.innerHTML = `
+        <input class="form-check-input" type="checkbox"
+               name="subcategories" id="subcat_${idStr}" value="${idStr}" ${isChecked ? "checked" : ""}>
+        <label class="form-check-label" for="subcat_${idStr}">
+          ${subcat.name}
+        </label>
+      `;
+      subcategoryContainer.appendChild(div);
+    });
+  }
+
+  // Carga subcategorías según categoría
+  function loadSubcategories(categoryId) {
+    if (!categoryId) {
+      subcategoryContainer.innerHTML = '<div class="alert alert-light small mb-0 p-2">Primero selecciona una categoría.</div>';
+      return;
+    }
+
+    subcategoryContainer.innerHTML = '<div class="alert alert-light small mb-0 p-2">Cargando subcategorías...</div>';
+
+    fetch(`{% url 'ajax_load_subcategories' %}?category_id=${categoryId}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Respuesta no OK");
+        return res.json();
+      })
+      .then(data => renderSubcategories(data))
+      .catch(err => {
+        console.error("Error cargando subcategorías:", err);
+        subcategoryContainer.innerHTML = '<div class="alert alert-danger">Error al cargar subcategorías.</div>';
+      });
+  }
+
+  // Carga IDs seleccionados del producto (opcional)
+  function loadInitiallySelected(productId) {
+    if (!productId) return Promise.resolve(); // sin preselección
+    const url = `/ajax/product-selected-subcategories/?product_id=${encodeURIComponent(productId)}`;
+    return fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error("Respuesta no OK");
+        return res.json();
+      })
+      .then(ids => {
+        // Asegurar strings en el Set
+        (ids || []).forEach(id => initiallySelected.add(String(id)));
+      })
+      .catch(err => {
+        console.warn("No se pudieron cargar subcategorías seleccionadas:", err);
+      });
+  }
+
+  // Al cambiar de categoría, recargar subcategorías (sin mantener selección previa)
+  categorySelect.addEventListener("change", function() {
+    initiallySelected.clear();
+    loadSubcategories(this.value);
+  });
+
+  // Inicialización: cargar preselección y luego subcategorías según la categoría actual
+  loadInitiallySelected(PRODUCT_ID).finally(() => {
+    if (categorySelect.value) {
+      loadSubcategories(categorySelect.value);
+    }
+  });
+});
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const radios = document.querySelectorAll('input[name="tipo_venta"]');
     const precioContainer = document.getElementById('precio-container-edit');
     const precioInput = document.getElementById('price');
     const form = document.querySelector('form');
-    
+    const checkOferta = document.getElementById('en_oferta');
+    const descuentoContainer = document.getElementById('descuento-container');
+
+    checkOferta.addEventListener('change', toggleDescuento);
+
+    function toggleDescuento() {
+        descuentoContainer.style.display = checkOferta.checked ? 'block' : 'none';
+    }
+    toggleDescuento();
+
     function actualizarPrecio() {
         const tipoSeleccionado = document.querySelector('input[name="tipo_venta"]:checked').value;
         if (tipoSeleccionado === 'intercambio') {
@@ -175,6 +311,8 @@ document.addEventListener('DOMContentLoaded', function() {
     radios.forEach(radio => {
         radio.addEventListener('change', actualizarPrecio);
     });
+
+    
     
     // Inicializar al cargar
     actualizarPrecio();

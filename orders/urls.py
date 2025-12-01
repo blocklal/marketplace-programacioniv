@@ -15,5 +15,5 @@ urlpatterns = [
 
     #Reviews
     path('review/<str:username>/', views.crear_review, name='crear_review'),
-    path('mis-reviews-pendientes/', views.mis_reviews_pendientes, name='reviews_pendientes'),
+    path('reviews/', views.mis_reviews_pendientes, name='reviews'),
 ]

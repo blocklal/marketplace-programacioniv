@@ -413,6 +413,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+
     <!-- Navbar Principal -->
     <nav class="main-navbar">
         <div class="container">
@@ -472,8 +473,16 @@
                                     <a href="{% url 'my_products' %}">
                                         <i class="fas fa-th"></i> Mis productos
                                     </a>
+                                    {% if user.is_staff %}
+                                        <a href="{% url 'category_list' %}">
+                                            <i class="fas fa-edit"></i> Categorias
+                                        </a>
+                                    {% endif %}
                                     <a href="{% url 'seller_orders' %}">
                                         <i class="fas fa-store"></i> Mis ventas
+                                    </a>
+                                    <a href="{% url 'reviews' %}">
+                                        <i class="fas fa-star"></i> Reviews
                                     </a>
 
                                     <div class="dropdown-divider"></div>
@@ -592,8 +601,8 @@
             <hr style="border-color: #4a5568; margin-top: 30px;">
             
             <div class="text-center py-3">
-                <p class="mb-0">&copy; 2024 Blue Shopping. Todos los derechos reservados.</p>
-                <small style="color: var(--light-blue);">Hecho en Argentina con 💙 y 🐱</small>
+                <p class="mb-0">&copy; 2025 Blue Shopping. Todos los derechos reservados.</p>
+                <small style="color: var(--light-blue);">Hecho en Argentina</small>
             </div>
         </div>
     </footer>

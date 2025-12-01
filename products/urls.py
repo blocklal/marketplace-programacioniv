@@ -9,4 +9,7 @@ urlpatterns = [
     path('<int:product_id>/eliminar/', views.product_delete, name='product_delete'),
     path('mis-productos/', views.my_products, name='my_products'),
     path('categorias/agregar/', views.category_add, name='category_add'),
+    path('categorias/', views.category_list, name='category_list'),
+    path('categorias/<int:category_id>/editar/', views.category_edit, name='category_edit'),
+    path('ajax/load-subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
 ]

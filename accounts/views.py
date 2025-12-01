@@ -16,29 +16,17 @@ from django.db.models import Avg
 def signup(request):
     if request.method == 'GET':
         return render(request, 'signup.html', {'form': CustomUserCreationForm()})
-
+    
     else:
         form = CustomUserCreationForm(request.POST)
-
+        
         if form.is_valid():
-            try:
-                user = form.save(commit=False)
-                user.email = form.cleaned_data['email']
-                user.save()
-                login(request, user)
-
-
-                return redirect('product_list')
-            except IntegrityError:
-                return render(request, 'signup.html', {
-                    'form': CustomUserCreationForm(),
-                    'error': 'El usuario ya existe'
-                })
-        else:
-            return render(request, 'signup.html', {
-                'form': form,
-                'error': 'Datos inválidos'
-            })
+            user = form.save()
+            login(request, user)
+            return redirect('product_list')
+        
+        # Si el form no es válido, se renderea con los errores
+        return render(request, 'signup.html', {'form': form})
         
 def signin(request):
 
@@ -59,6 +47,14 @@ def signin(request):
 def signout(request):
     logout(request)
     return redirect('signin')
+
+def signout(request):
+    if request.method == 'POST':
+        logout(request)
+        return redirect('product_list')
+    
+    # GET - mostrar confirmación
+    return render(request, 'logout.html')
 
 @login_required
 def profile_view(request, username=None):
