@@ -2,11 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import Product, Category, SubCategory
-from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-
-# Create your views here.
+from django.contrib import messages
 
 def product_list(request):
     products = Product.objects.all().order_by('-creation_time')
@@ -33,13 +31,13 @@ def product_list(request):
             subcategories = SubCategory.objects.filter(category=selected_category).order_by('name')
         except Category.DoesNotExist:
             selected_category_id = ''
+            messages.warning(request, 'La categoría seleccionada no existe')
         
         if not selected_subcategory_ids:
             products = products.filter(category_id=selected_category_id)
 
     if selected_subcategory_ids:
         products = products.filter(subcategories__id__in=selected_subcategory_ids).distinct()
-
 
     if brand:
         products = products.filter(brand__icontains=brand)
@@ -118,6 +116,7 @@ def product_add(request):
             subs = SubCategory.objects.filter(id__in=subcategory_ids)
             product.subcategories.set(subs)
         
+        messages.success(request, f'Producto "{name}" creado exitosamente')
         return redirect('product_list')
     
     # Método GET
@@ -170,10 +169,11 @@ def product_edit(request, product_id):
             subs = SubCategory.objects.filter(id__in=subcategory_ids)
             product.subcategories.set(subs) 
         else:
-            product.subcategories.clear() 
-            
-        messages.success(request, 'Producto actualizado exitosamente')
+            product.subcategories.clear()
+        
+        messages.success(request, f'Producto "{name}" actualizado exitosamente')
         return redirect('product_detail', product_id=product.id)
+    
     categories = Category.objects.all()
     if product.category:
         available_subcategories = SubCategory.objects.filter(category=product.category).order_by('name')
@@ -234,12 +234,13 @@ def my_products(request):
 
 def category_add(request):
     if not request.user.is_staff:
+        messages.error(request, 'No tienes permiso para agregar categorías')
         return redirect('product_list')
     
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')
-        subcategories = request.POST.getlist('subcategories')  # lista de strings
+        subcategories = request.POST.getlist('subcategories')
 
         category = Category.objects.create(
             name=name,
@@ -248,12 +249,13 @@ def category_add(request):
 
         # Crear cada subcategoría asociada
         for subcat_name in subcategories:
-            if subcat_name.strip():  # evitar vacíos
+            if subcat_name.strip():
                 SubCategory.objects.create(
                     name=subcat_name.strip(),
                     category=category
                 )
 
+        messages.success(request, f'Categoría "{name}" creada exitosamente')
         return redirect('category_list')
     
     return render(request, 'categories/category_form.html')
@@ -261,12 +263,14 @@ def category_add(request):
 
 def category_list(request):
     if not request.user.is_staff:
+        messages.error(request, 'No tienes permiso para ver las categorías')
         return redirect('product_list')
     categories = Category.objects.prefetch_related('subcategories').order_by('name')
     return render(request, 'categories/category_list.html', {'categories': categories})
 
 def category_edit(request, category_id):
     if not request.user.is_staff:
+        messages.error(request, 'No tienes permiso para editar categorías')
         return redirect('product_list')
     category = get_object_or_404(Category, id=category_id)
 
@@ -281,26 +285,23 @@ def category_edit(request, category_id):
 
         if action == 'delete_sub':
             sub_id = request.POST.get('sub_id')
-            # Solo borra si la subcategoria pertenece a esta categoría
             SubCategory.objects.filter(id=sub_id, category=category).delete()
-            messages.success(request, 'Subcategoría eliminada.')
+            messages.success(request, 'Subcategoría eliminada')
             return redirect('category_edit', category_id=category.id)
 
         elif action == 'add_sub':
             sub_name = request.POST.get('new_sub_name', '').strip()
             if sub_name:
-                # Evitar duplicados dentro de la misma categoría
                 exists = SubCategory.objects.filter(category=category, name__iexact=sub_name).exists()
                 if exists:
-                    messages.error(request, 'Ya existe una subcategoría con ese nombre en esta categoría.')
+                    messages.warning(request, 'La subcategoría ya existe en esta categoría')
                 else:
                     SubCategory.objects.create(category=category, name=sub_name)
-                    messages.success(request, 'Subcategoría agregada.')
+                    messages.success(request, f'Subcategoría "{sub_name}" agregada')
             else:
-                messages.error(request, 'Ingresá un nombre para la subcategoría.')
+                messages.error(request, 'El nombre de la subcategoría no puede estar vacío')
             return redirect('category_edit', category_id=category.id)
 
-        # Cualquier otro POST redirige
         return redirect('category_edit', category_id=category.id)
 
     current_subs = SubCategory.objects.filter(category=category).order_by('name')

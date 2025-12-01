@@ -1,0 +1,526 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load favoritos_tags %}
+
+{% block title %}Inicio - Blue Shopping{% endblock %}
+
+{% block content %}
+<!-- Carrusel de Banners -->
+<div id="mainCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="2"></button>
+    </div>
+    
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="banner-slide bg-gradient-1">
+                <div class="container h-100">
+                    <div class="row h-100 align-items-center">
+                        <div class="col-md-6">
+                            <h1 class="display-4 fw-bold text-white mb-4">
+                                😺 Bienvenido a Blue Shopping
+                            </h1>
+                            <p class="lead text-white mb-4">
+                                Tu marketplace de confianza. Comprá, vendé e intercambiá productos de forma segura.
+                            </p>
+                            <a href="{% url 'product_list' %}" class="btn btn-light btn-lg">
+                                <i class="fas fa-shopping-bag"></i> Explorar Productos
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-center d-none d-md-block">
+                            <i class="fas fa-cat" style="font-size: 15rem; opacity: 0.3; color: white;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="carousel-item">
+            <div class="banner-slide bg-gradient-2">
+                <div class="container h-100">
+                    <div class="row h-100 align-items-center">
+                        <div class="col-md-6">
+                            <h1 class="display-4 fw-bold text-white mb-4">
+                                🔥 Ofertas imperdibles
+                            </h1>
+                            <p class="lead text-white mb-4">
+                                ¡Explora los mejores descuentos en el sitio!
+                            </p>
+                            <a href="{% url 'product_list' %}?tipo_venta=venta" class="btn btn-warning btn-lg">
+                                <i class="fas fa-fire"></i> Ver Ofertas
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-center d-none d-md-block">
+                            <i class="fas fa-tags" style="font-size: 15rem; opacity: 0.3; color: white;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="carousel-item">
+            <div class="banner-slide bg-gradient-3">
+                <div class="container h-100">
+                    <div class="row h-100 align-items-center">
+                        <div class="col-md-6">
+                            <h1 class="display-4 fw-bold text-white mb-4">
+                                🔄 Sistema de Intercambio
+                            </h1>
+                            <p class="lead text-white mb-4">
+                                Intercambiá productos con otros usuarios. Una forma sustentable de renovar tus cosas.
+                            </p>
+                            <a href="{% url 'product_list' %}?tipo_venta=intercambio" class="btn btn-info btn-lg">
+                                <i class="fas fa-exchange-alt"></i> Explorar Intercambios
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-center d-none d-md-block">
+                            <i class="fas fa-sync-alt" style="font-size: 15rem; opacity: 0.3; color: white;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<div class="container">
+    <section class="mb-5">
+        <div class="section-header mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold">
+                        <i class="fas fa-fire text-danger"></i> Productos más vendidos
+                    </h2>
+                    <p class="text-muted mb-0">Los favoritos de nuestra comunidad</p>
+                </div>
+                <a href="{% url 'product_list' %}" class="btn btn-outline-primary">
+                    Ver todos <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        {% if productos_mas_vendidos %}
+        <div class="row">
+            {% for producto in productos_mas_vendidos %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card product-card h-100 shadow-sm">
+                    <!-- Badge de más vendido -->
+                    <div class="position-absolute top-0 start-0 m-2" style="z-index: 5;">
+                        <span class="badge bg-danger">
+                            <i class="fas fa-crown"></i> TOP
+                        </span>
+                    </div>
+                    
+                    <!-- Botón Favorito -->
+                    {% if request.user.is_authenticated %}
+                    {% es_favorito request.user producto as is_fav %}
+                    <button class="btn-favorito position-absolute top-0 end-0 m-2" 
+                            data-producto-id="{{ producto.id }}">
+                        <i class="{% if is_fav %}fas{% else %}far{% endif %} fa-heart"></i>
+                    </button>
+                    {% endif %}
+                    
+                    <!-- Imagen -->
+                    <a href="{% url 'product_detail' producto.id %}">
+                        {% if producto.image %}
+                            <img src="{{ producto.image.url }}" 
+                            class="card-img-top product-img" 
+                            alt="{{ producto.name }}">
+                        {% else %}
+                            <div class="card-img-top product-img-placeholder">
+                                <i class="fas fa-image"></i>
+                                <p class="mb-0">Sin imagen</p>
+                            </div>
+                        {% endif %}
+                    </a>
+                    
+                    <!-- Contenido -->
+                    <div class="card-body">
+                        <a href="{% url 'product_detail' producto.id %}" class="text-decoration-none text-dark">
+                            <h6 class="card-title product-title">{{ producto.name }}</h6>
+                            <p class="text-muted small mb-2">{{ producto.category.name }}</p>
+                        </a>
+                        
+                        {% if producto.en_oferta %}
+                            <div class="precio-oferta">
+                                <small class="text-muted text-decoration-line-through">${{ producto.price }}</small>
+                                <h5 class="text-danger fw-bold mb-1">${{ producto.get_precio_oferta }}</h5>
+                            </div>
+                        {% else %}
+                            <h5 class="text-primary fw-bold mb-2">${{ producto.price }}</h5>
+                        {% endif %}
+                        
+                        <small class="text-muted d-block mb-3">
+                            <i class="fas fa-shopping-cart"></i> {{ producto.total_vendidos }} vendidos
+                        </small>
+                        
+                        {% if producto.stock > 0 %}
+                            <button class="btn-agregar-carrito btn btn-primary btn-sm w-100" 
+                                    data-producto-id="{{ producto.id }}">
+                                <i class="fas fa-cart-plus"></i> Agregar
+                            </button>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm w-100" disabled>Sin stock</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i> Todavía no hay productos vendidos
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Productos en Oferta -->
+    {% if productos_en_oferta %}
+    <section class="mb-5">
+        <div class="section-header mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold">
+                        <i class="fas fa-tag text-warning"></i> Ofertas Destacadas
+                    </h2>
+                    <p class="text-muted mb-0">Aprovechá estos descuentos increíbles</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for producto in productos_en_oferta %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card product-card h-100 shadow-sm">
+                    <!-- Badge de oferta -->
+                    <div class="position-absolute top-0 start-0 m-2" style="z-index: 5;">
+                        <span class="badge bg-danger">
+                            <i class="fas fa-fire"></i> {{ producto.porcentaje_descuento }}% OFF
+                        </span>
+                    </div>
+                    
+                    <!-- Botón Favorito -->
+                    {% if request.user.is_authenticated %}
+                    {% es_favorito request.user producto as is_fav %}
+                    <button class="btn-favorito position-absolute top-0 end-0 m-2" 
+                            data-producto-id="{{ producto.id }}">
+                        <i class="{% if is_fav %}fas{% else %}far{% endif %} fa-heart"></i>
+                    </button>
+                    {% endif %}
+                    
+                    <!-- Imagen -->
+                    <a href="{% url 'product_detail' producto.id %}">
+                        {% if producto.image %}
+                            <img src="{{ producto.image.url }}" 
+                            class="card-img-top product-img" 
+                            alt="{{ producto.name }}">
+                        {% else %}
+                            <div class="card-img-top product-img-placeholder">
+                                <i class="fas fa-image"></i>
+                                <p class="mb-0">Sin imagen</p>
+                            </div>
+                        {% endif %}
+                    </a>
+                    
+                    <!-- Contenido -->
+                    <div class="card-body">
+                        <a href="{% url 'product_detail' producto.id %}" class="text-decoration-none text-dark">
+                            <h6 class="card-title product-title">{{ producto.name }}</h6>
+                            <p class="text-muted small mb-2">{{ producto.category.name }}</p>
+                        </a>
+                        
+                        <div class="precio-oferta">
+                            <small class="text-muted text-decoration-line-through">${{ producto.price }}</small>
+                            <h5 class="text-danger fw-bold mb-1">${{ producto.get_precio_oferta }}</h5>
+                            <small class="text-success">
+                                <i class="fas fa-check-circle"></i> Ahorrás ${{ producto.get_ahorro }}
+                            </small>
+                        </div>
+                        
+                        {% if producto.stock > 0 %}
+                            <button class="btn-agregar-carrito btn btn-danger btn-sm w-100 mt-2" 
+                                    data-producto-id="{{ producto.id }}">
+                                <i class="fas fa-cart-plus"></i> Aprovechar Oferta
+                            </button>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm w-100 mt-2" disabled>Sin stock</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Categorías Destacadas -->
+    <section class="mb-5">
+        <div class="section-header mb-4">
+            <h2 class="fw-bold">
+                <i class="fas fa-th-large text-primary"></i> Explorá por Categorías
+            </h2>
+            <p class="text-muted mb-0">Encontrá lo que buscás más rápido</p>
+        </div>
+        
+        <div class="row g-3">
+            {% for cat in categories|slice:":6" %}
+            <div class="col-lg-2 col-md-4 col-6">
+                <a href="{% url 'product_list' %}?category={{ cat.id }}" class="category-card">
+                    <div class="card text-center h-100 hover-card">
+                        <div class="card-body">
+                            {% if cat.name == "Lácteos" %}
+                                <i class="fas fa-cheese category-icon"></i>
+                            {% elif cat.name == "Carnes" %}
+                                <i class="fas fa-drumstick-bite category-icon"></i>
+                            {% elif cat.name == "Bebidas" %}
+                                <i class="fas fa-wine-bottle category-icon"></i>
+                            {% elif cat.name == "Verduras" or cat.name == "Frutas y Verduras" %}
+                                <i class="fas fa-carrot category-icon"></i>
+                            {% elif cat.name == "Limpieza" %}
+                                <i class="fas fa-spray-can category-icon"></i>
+                            {% else %}
+                                <i class="fas fa-box category-icon"></i>
+                            {% endif %}
+                            <h6 class="mt-2 mb-0">{{ cat.name }}</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+
+.product-img {
+    height: 220px;
+    width: 100%;
+    object-fit: scale-down;
+    background: white;
+     padding: 5px;
+}
+
+.product-img-placeholder {
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f0e8 0%, #e8e4dc 100%);
+    color: #999;
+}
+
+.product-img-placeholder i {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+
+/* Carrusel */
+.carousel-inner {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.banner-slide {
+    height: 450px;
+    display: flex;
+    align-items: center;
+}
+
+.bg-gradient-1 {
+    background: linear-gradient(135deg, #4A90E2 0%, #2C5AA0 100%);
+}
+
+.bg-gradient-2 {
+    background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+}
+
+.bg-gradient-3 {
+    background: linear-gradient(135deg, #00A650 0%, #008040 100%);
+}
+
+/* Productos */
+.product-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(74, 144, 226, 0.15) !important;
+}
+
+.product-title {
+    font-weight: 600;
+    min-height: 2.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
+/* Botón Favorito */
+.btn-favorito {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 5;
+}
+
+.btn-favorito:hover {
+    transform: scale(1.15);
+}
+
+.btn-favorito i {
+    font-size: 1.2rem;
+    color: #dc3545;
+}
+
+/* Categorías */
+.category-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+.category-icon {
+    font-size: 2.5rem;
+    color: #4A90E2;
+}
+
+.hover-card {
+    transition: all 0.3s;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(74, 144, 226, 0.2);
+}
+
+/* Precios en oferta */
+.precio-oferta h5 {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .banner-slide {
+        height: 350px;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // FAVORITOS
+    document.querySelectorAll('.btn-favorito').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const productoId = this.dataset.productoId;
+            const icon = this.querySelector('i');
+            
+            fetch(`/favoritos/toggle/${productoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    icon.classList.toggle('far');
+                    icon.classList.toggle('fas');
+                    
+                    const contador = document.querySelector('.contador-favoritos');
+                    if (contador) {
+                        const nuevo = parseInt(contador.textContent || 0) + (data.es_favorito ? 1 : -1);
+                        contador.textContent = nuevo;
+                        contador.style.display = nuevo === 0 ? 'none' : 'inline';
+                    }
+                }
+            });
+        });
+    });
+
+    // AGREGAR AL CARRITO
+    document.querySelectorAll('.btn-agregar-carrito').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const productoId = this.dataset.productoId;
+            const originalText = this.innerHTML;
+            
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            fetch("{% url 'cart_add' 0 %}".replace('0', productoId), {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const contador = document.querySelector('.contador-carrito');
+                    if (contador) {
+                        contador.textContent = data.cart_count;
+                        contador.style.display = 'inline';
+                    }
+                    
+                    this.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
+                    this.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.classList.remove('btn-success');
+                        this.disabled = false;
+                    }, 1500);
+                }
+            });
+        });
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

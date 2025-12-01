@@ -30,10 +30,13 @@
         <div class="col-md-6">
             <div class="card shadow-sm">
                 {% if product.image %}
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="width: 100%; height: 400px; object-fit: cover;">
+                    <img src="{{ product.image.url }}" 
+                    class="card-img-top product-img" 
+                    alt="{{ product.name }}">
                 {% else %}
-                    <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 400px;">
-                        <span class="text-white fs-3">Sin imagen</span>
+                    <div class="card-img-top product-img-placeholder">
+                        <i class="fas fa-image"></i>
+                        <p class="mb-0">Sin imagen</p>
                     </div>
                 {% endif %}
             </div>
@@ -355,6 +358,30 @@
     transform: translateY(-5px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
+
+.product-img {
+    height: 220px;
+    width: 100%;
+    object-fit: scale-down;
+    background: white;
+     padding: 5px;
+}
+
+.product-img-placeholder {
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f0e8 0%, #e8e4dc 100%);
+    color: #999;
+}
+
+.product-img-placeholder i {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
 </style>
 
 <script>

@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.utils import timezone
 from .models import Order, OrderItem, Review
 from cart.models import Cart
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 @login_required
 def checkout(request):
@@ -94,6 +94,7 @@ def create_order(request):
 
 @login_required
 def order_list(request):
+
     orders = Order.objects.filter(user=request.user).prefetch_related(
         'items__seller'  # Eliminar 'items__reviews' porque ya no existe esa relación
     ).order_by('-created_at')

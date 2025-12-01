@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-resdjh0dhoum#u!du4#se543d^3rihl)=gqgw%9h0yy4sh@fn^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['blockdroidd.pythonanywhere.com', 'localhost']
+ALLOWED_HOSTS = ['blockdroidd.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -136,3 +137,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+# Mensajes
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'error',
+    messages.WARNING: 'warning',
+    messages.SUCCESS: 'success',
+    messages.INFO: 'info',
+}
