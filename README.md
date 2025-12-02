@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 python manage.py migrate
 
-python manage.py createsuperuser
+python manage.py createsuperuser (Introducir dentro del grupo de Admin en http://127.0.0.1:8000/admin)
 
 python manage.py runserver
 
