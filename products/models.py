@@ -1,6 +1,6 @@
 from django.db import models
 from accounts.models import Profile
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 # Create your models here.
 #seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="products")
@@ -44,14 +44,17 @@ class Product(models.Model):
     def get_precio_oferta(self):
         if self.en_oferta and self.porcentaje_descuento > 0:
             descuento = self.price * (Decimal(self.porcentaje_descuento) / Decimal(100))
-            return self.price - descuento
-        return self.price
+            precio_final = self.price - descuento
+            # Redondea a 2 decimales
+            return precio_final.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        return self.price.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     def get_ahorro(self):
-        """Calcula cuánto se ahorra con la oferta"""
         if self.en_oferta and self.porcentaje_descuento > 0:
-            return self.price * (Decimal(self.porcentaje_descuento) / Decimal(100))
-        return Decimal(0)
+            ahorro = self.price * (Decimal(self.porcentaje_descuento) / Decimal(100))
+            # Redondea a 2 decimales
+            return ahorro.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        return Decimal('0.00')
     
 class Category(models.Model):
     name = models.CharField(max_length=50)
