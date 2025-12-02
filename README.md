@@ -1,6 +1,6 @@
 # BlueShopping - Ventas e intercambio de productos
 
-BlueShopping es una plataforma web desarrollada en Django que permite a los usuarios vender, intercambiar y comprar productos entre ellos. El sistema incluye funcionalidades de **carrito persistente**, **favoritos**, **reviews** y permite el inicio de sesión a través de **Google** y **Facebook**.
+BlueShopping es una plataforma web desarrollada en Django que permite a los usuarios vender, intercambiar y comprar productos entre ellos. El sistema incluye funcionalidades de carrito persistente, favoritos, reviews y permite el inicio de sesión a través de Google y Facebook.
 
 ## Características principales
 
