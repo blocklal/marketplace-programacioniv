@@ -4,5 +4,6 @@ __pycache__/
 .env
 *.log
 /staticfiles/
+db.sqlite3
 media/
 wsipythonanywhereproduction

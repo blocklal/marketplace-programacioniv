@@ -298,33 +298,48 @@ def crear_review(request, username):
 @login_required
 def mis_reviews_pendientes(request):
     """Lista de usuarios con los que puedes dejar review"""
-    from django.db.models import Q
-    
-    vendedores = User.objects.filter(
-        sold_items__order__user=request.user,
-        sold_items__order__status='delivered'
-    ).exclude(
-        id=request.user.id
-    ).distinct()
-    
-    compradores = User.objects.filter(
-        orders__items__seller=request.user,
-        orders__status='delivered'
-    ).exclude(
-        id=request.user.id
-    ).distinct()
-    
-    usuarios_transaccion = (vendedores | compradores).distinct()
-    
-    for usuario in usuarios_transaccion:
-        usuario.mi_review = Review.objects.filter(
+
+    usuarios = set()
+
+    # Usuarios a los que les compraste productos (vendedores)
+    vendidos = OrderItem.objects.filter(
+        order__user=request.user,
+        order__status='delivered'
+    ).values_list('seller', flat=True)
+    print("IDs de vendedores:", list(vendidos))  # DEBUG
+
+    for user_id in vendidos:
+        usuario = User.objects.get(id=user_id)
+        print("Vendedor agregado:", usuario.username)  # DEBUG
+        usuarios.add(usuario)
+
+    # Usuarios que te compraron productos (compradores)
+    compraron = OrderItem.objects.filter(
+        seller=request.user,
+        order__status='delivered'
+    ).values_list('order__user', flat=True)
+    print("IDs de compradores:", list(compraron))  # DEBUG
+
+    for user_id in compraron:
+        usuario = User.objects.get(id=user_id)
+        print("Comprador agregado:", usuario.username)  # DEBUG
+        usuarios.add(usuario)
+
+    # Agregar atributo mi_review a cada usuario
+    for usuario in usuarios:
+        review = Review.objects.filter(
             autor=request.user,
             receptor=usuario
         ).first()
-    
+        usuario.mi_review = review
+        print(f"Usuario: {usuario.username}, mi_review:", review)  # DEBUG
+
     context = {
-        'usuarios': usuarios_transaccion,
+        'usuarios': usuarios,
     }
+
+    print("Usuarios finales en contexto:", [u.username for u in usuarios])  # DEBUG
+
     return render(request, 'reviews/pendientes_review.html', context)
 
 @login_required
