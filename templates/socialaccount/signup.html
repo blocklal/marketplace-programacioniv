@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Completar Registro - Blue Shopping{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <!-- Icono -->
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-check text-primary" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <!-- Título -->
+                    <h3 class="text-center mb-3">¡Último Paso!</h3>
+                    <p class="text-center text-muted mb-4">
+                        Estás por iniciar sesión con 
+                        {% if account.provider == 'google' %}
+                            <strong class="text-danger"><i class="fab fa-google"></i> Google</strong>
+                        {% elif account.provider == 'facebook' %}
+                            <strong class="text-primary"><i class="fab fa-facebook"></i> Facebook</strong>
+                        {% else %}
+                            <strong>{{ account.provider }}</strong>
+                        {% endif %}
+                    </p>
+
+                    <!-- Información del usuario social -->
+                    {% if account.extra_data.picture or account.extra_data.picture.data.url %}
+                    <div class="text-center mb-4">
+                        {% if account.provider == 'google' %}
+                            <img src="{{ account.extra_data.picture }}" 
+                                 alt="Foto de perfil" 
+                                 class="rounded-circle" 
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        {% elif account.provider == 'facebook' %}
+                            <img src="{{ account.extra_data.picture.data.url }}" 
+                                 alt="Foto de perfil" 
+                                 class="rounded-circle" 
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle"></i> 
+                        Por favor, completá estos datos para finalizar tu registro en Blue Shopping
+                    </div>
+
+                    <!-- Formulario -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-envelope"></i> Email
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.email.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Username -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-user"></i> Nombre de Usuario
+                            </label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.username.errors }}
+                                </div>
+                            {% else %}
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Será tu nombre público en Blue Shopping
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Términos -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label small" for="terms">
+                                Acepto los <a href="#" class="text-primary">términos y condiciones</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle"></i> Completar Registro
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Link para cancelar -->
+                    <div class="text-center mt-4">
+                        <a href="{% url 'home' %}" class="text-muted">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer info -->
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt"></i> Tus datos están protegidos
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.btn-lg {
+    padding: 12px 20px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4A90E2, #2C5AA0);
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2C5AA0, #1a3a70);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.form-control {
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+    color: #1976d2;
+}
+
+.form-check-input:checked {
+    background-color: #4A90E2;
+    border-color: #4A90E2;
+}
+</style>
+{% endblock %}
