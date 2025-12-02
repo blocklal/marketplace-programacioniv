@@ -35,7 +35,7 @@ class CartItem(models.Model):
     
     def get_subtotal(self):
         """Calcula el subtotal de este item"""
-        return self.product.price * self.quantity
+        return self.product.get_precio_oferta() * self.quantity
     
 
 @receiver(post_save, sender=User)
