@@ -32,7 +32,7 @@ En una términal ejecuta estos comando para ejecutar el proyecto localmente:
 
 git clone https:github.com/blocklal/marketplace-programacioniv.git
 
-cd marketplace
+cd marketplace-programacioniv
 
 python -m venv venv
 
