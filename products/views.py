@@ -96,7 +96,7 @@ def product_add(request):
         
         porcentaje_descuento = request.POST.get('porcentaje_descuento')
         if not porcentaje_descuento:
-            porcentaje_descuento = 0
+            porcentaje_descuento = 1
         
         if not price or price.strip() == '' or tipo_venta == 'intercambio':
             price = 0
@@ -150,7 +150,7 @@ def product_edit(request, product_id):
         en_oferta = request.POST.get('en_oferta') == 'on'
         
         porcentaje_descuento_str = request.POST.get('porcentaje_descuento')
-        porcentaje_descuento = int(porcentaje_descuento_str) if porcentaje_descuento_str else 0
+        porcentaje_descuento = int(porcentaje_descuento_str) if porcentaje_descuento_str else 1
         
         if not price or price.strip() == '' or tipo_venta == 'intercambio':
             price = 0

@@ -141,10 +141,16 @@
                         {% else %}
                             {% if product.stock > 0 and product.on_stock %}
                                 {% if product.acepta_venta %}
-                                    <button class="btn-agregar-carrito btn btn-primary btn-lg" 
-                                            data-producto-id="{{ product.id }}">
-                                        <i class="fas fa-cart-plus"></i> Agregar al carrito
-                                    </button>
+                                    {% if request.user.is_authenticated %}
+                                        <button class="btn-agregar-carrito btn btn-primary btn-lg" 
+                                                data-producto-id="{{ product.id }}">
+                                            <i class="fas fa-cart-plus"></i> Agregar al carrito
+                                        </button>
+                                    {% else %}
+                                        <a href="{% url 'signin' %}" class="btn btn-outline-primary btn-lg">
+                                            <i class="fas fa-sign-in-alt"></i> Inicia sesión para agregar
+                                        </a>
+                                    {% endif %}
                                 {% endif %}
                                 
                                 {% if product.acepta_intercambio %}
