@@ -31,13 +31,21 @@ BlueShopping es una plataforma web desarrollada en Django que permite a los usua
 En una términal ejecuta estos comando para ejecutar el proyecto localmente:
 
 git clone https:github.com/blocklal/marketplace-programacioniv.git
+
 cd marketplace
+
 python -m venv venv
+
 .\venv\Scripts\activate (Windows) //// source venv/bin/activate (Linux/macOS)
+
 pip install -r requirements.txt
+
 python manage.py migrate
+
 python manage.py createsuperuser
+
 python manage.py runserver
+
 Abre tu navegador en http://127.0.0.1:8000/ para ver la aplicación
 
 Incluye una base de datos mínima para demostración de productos, se pueden eliminar desde http://127.0.0.1:8000/admin
